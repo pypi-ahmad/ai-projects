@@ -1,0 +1,53 @@
+{
+  "context_window": 400,
+  "reserve_output_tokens": 80,
+  "reserve_system_tokens": 0,
+  "user_message": "Summarize the key financial findings.",
+  "policy": "balanced",
+  "blocks": [
+    {
+      "id": "sys-1",
+      "family": "system",
+      "text": "You are a financial analyst assistant. Always cite source tags when referencing retrieved documents.",
+      "priority": 100,
+      "created_at": "2026-09-11T00:00:00+00:00"
+    },
+    {
+      "id": "mem-1",
+      "family": "memory",
+      "text": "In the previous session the user asked about Q2 revenue trends and margin compression. The assistant confirmed gross margin fell 3 pp to 41 percent due to supply chain costs.",
+      "priority": 80,
+      "created_at": "2026-09-11T00:00:00+00:00"
+    },
+    {
+      "id": "doc-1",
+      "family": "docs",
+      "text": "Q3 Financial Report — Revenue 4.2 M up 12 percent YoY. Operating costs 3.1 M. EBITDA 1.1 M margin 26 percent. Headcount grew from 48 to 61. Cash position 2.3 M end of quarter. Inventory turns improved to 8.4 from 7.1. Accounts receivable days outstanding 38. Capital expenditure 0.4 M primarily infrastructure. Board approved 0.5 M share buyback programme commencing Q4.",
+      "priority": 70,
+      "compressible": true,
+      "created_at": "2026-09-11T00:00:00+00:00"
+    },
+    {
+      "id": "doc-2",
+      "family": "docs",
+      "text": "Q4 Forecast — Projected revenue 4.8 M driven by two enterprise contracts signed in October worth a combined 0.9 M annualised. Pipeline coverage ratio 3.2 x. Marketing spend increasing 20 percent to support two product launches. Hiring plan adds 14 engineers and 4 sales staff. Expected gross margin recovery to 44 percent as supply chain normalises. CFO flagged FX headwind of approximately 0.15 M if sterling weakens further. Scenario analysis: bear case 4.3 M revenue at 22 percent EBITDA margin, base 4.8 M at 26 percent, bull 5.4 M at 29 percent. Board risk register updated to include concentration risk from top-three customers representing 58 percent of ARR.",
+      "priority": 40,
+      "compressible": false,
+      "created_at": "2026-09-11T00:00:00+00:00"
+    },
+    {
+      "id": "tool-1",
+      "family": "tools",
+      "text": "{\"name\": \"calculator\", \"description\": \"Evaluate arithmetic expressions.\", \"parameters\": {\"expression\": {\"type\": \"string\"}}}",
+      "priority": 75,
+      "created_at": "2026-09-11T00:00:00+00:00"
+    },
+    {
+      "id": "tool-2",
+      "family": "tools",
+      "text": "{\"name\": \"web_search\", \"description\": \"Search the web for current information.\", \"parameters\": {\"query\": {\"type\": \"string\"}, \"num_results\": {\"type\": \"integer\", \"default\": 5}, \"date_range\": {\"type\": \"string\", \"enum\": [\"day\", \"week\", \"month\", \"year\", \"any\"], \"default\": \"any\"}, \"safe_search\": {\"type\": \"boolean\", \"default\": true}, \"language\": {\"type\": \"string\", \"default\": \"en\"}, \"region\": {\"type\": \"string\", \"default\": \"us\"}, \"include_images\": {\"type\": \"boolean\", \"default\": false}, \"snippet_length\": {\"type\": \"integer\", \"default\": 200, \"maximum\": 500}}}",
+      "priority": 65,
+      "created_at": "2026-09-11T00:00:00+00:00"
+    }
+  ]
+}

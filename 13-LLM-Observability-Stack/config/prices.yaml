@@ -1,0 +1,18 @@
+# USD per 1000 tokens, by model name (must match Span.model exactly).
+# Unknown model -> cost_est=null, pricing flag "UNPRICED" (see docs/SCHEMA.md).
+#
+# Only rates we can actually verify are listed. Ollama models below run on
+# local compute (no metered API cost), so they're priced at 0, not left
+# unpriced. Non-Ollama providers (Agnes AI, the OpenAI-compatible endpoint,
+# Gemini) are deliberately omitted: this project has no verified current
+# rate card for those model names, and it does not invent pricing numbers.
+# Add real entries here once you have a rate to cite.
+models:
+  "granite4.1:3b": {in_per_1k: 0.0, out_per_1k: 0.0}
+  "qwen3.5:2b": {in_per_1k: 0.0, out_per_1k: 0.0}
+  "qwen3.5:0.8b": {in_per_1k: 0.0, out_per_1k: 0.0}
+  "qwen3-vl:2b": {in_per_1k: 0.0, out_per_1k: 0.0}
+  "qwen3-embedding:0.6b": {in_per_1k: 0.0, out_per_1k: 0.0}
+  "qwen3-embedding:4b": {in_per_1k: 0.0, out_per_1k: 0.0}
+  "translategemma:4b": {in_per_1k: 0.0, out_per_1k: 0.0}
+  "AuditAid/PaddleOCR-VL-1.6-0.9B": {in_per_1k: 0.0, out_per_1k: 0.0}

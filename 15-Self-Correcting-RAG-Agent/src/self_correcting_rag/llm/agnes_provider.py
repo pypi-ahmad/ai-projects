@@ -1,0 +1,25 @@
+"""Agnes AI provider (agnes-2.5-flash), via its OpenAI-compatible Chat
+Completions endpoint. No reasoning_effort -- Agnes's own docs use a different
+mechanism (chat_template_kwargs.enable_thinking) for that, not this param.
+"""
+
+from self_correcting_rag.config import AGNES_BASE_URL, AGNES_MODEL, load_settings
+from self_correcting_rag.llm.base import ProviderConfigError, ProviderSpec
+from self_correcting_rag.llm.openai_compat_client import OpenAICompatibleProvider
+
+DEFAULT_MODEL = AGNES_MODEL
+ALLOWED_MODELS = (AGNES_MODEL,)
+
+
+def make_provider() -> OpenAICompatibleProvider:
+    settings = load_settings()
+    if not settings.agnesai_api_key:
+        raise ProviderConfigError(
+            "AGNESAI_API_KEY is not set. Add it to your .env, or choose a different --provider."
+        )
+    return OpenAICompatibleProvider(api_key=settings.agnesai_api_key, base_url=AGNES_BASE_URL)
+
+
+SPEC = ProviderSpec(
+    factory=make_provider, default_model=DEFAULT_MODEL, allowed_models=ALLOWED_MODELS
+)

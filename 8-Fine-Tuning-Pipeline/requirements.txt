@@ -1,0 +1,21 @@
+# Pinned to the exact Windows 11 + CUDA stack verified in this repo (docs/STACK.md).
+# This repo's real install path is `uv sync` (pyproject.toml + uv.lock), which resolves the
+# torch/torchvision CUDA build automatically via [tool.uv.sources]/[[tool.uv.index]]. This file
+# is for a plain-pip fallback: torch/torchvision's CUDA wheels are NOT on PyPI for Windows, so
+# the extra index below is required, not optional.
+--extra-index-url https://download.pytorch.org/whl/cu130
+
+torch==2.14.0+cu130
+torchvision==0.29.0+cu130
+transformers==5.17.0
+peft==0.20.0
+trl==1.13.0
+accelerate==1.15.0
+bitsandbytes==0.50.2
+datasets==5.0.1
+huggingface-hub==1.31.0
+pydantic==2.13.5
+requests==2.34.2
+pyyaml==6.0.3
+streamlit==1.63.0
+pandas==3.0.5

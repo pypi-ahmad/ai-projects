@@ -1,0 +1,85 @@
+# Feature extraction configuration for complexity scoring.
+# All weights must sum to 1.0 under feature_weights.
+# Thresholds define the complexity_label boundaries.
+
+# Keyword groups — one hit per group is counted (first matching term wins).
+# weight: contribution to keyword_score (capped at 1.0 before feature_weights apply).
+keywords:
+  compare:
+    weight: 0.15
+    terms:
+      - "compare"
+      - "contrast"
+      - "difference between"
+      - "versus"
+      - " vs "
+  step_by_step:
+    weight: 0.20
+    terms:
+      - "step by step"
+      - "step-by-step"
+      - "walk me through"
+      - "walkthrough"
+      - "explain how to"
+  cite:
+    weight: 0.10
+    terms:
+      - "cite"
+      - "citation"
+      - "reference"
+      - "source"
+      - "evidence"
+      - "proof"
+  schema:
+    weight: 0.25
+    terms:
+      - "json schema"
+      - "structured output"
+      - "fill in the"
+      - "extract fields"
+      - "fill out the"
+  analysis:
+    weight: 0.15
+    terms:
+      - "analyze"
+      - "analyse"
+      - "evaluate"
+      - "assess"
+      - "critique"
+      - "review in detail"
+  synthesis:
+    weight: 0.20
+    terms:
+      - "synthesize"
+      - "synthesise"
+      - "summarize across"
+      - "across all"
+      - "combined view"
+      - "synthesizing"
+
+# Token count buckets — first matching bucket (ascending max) wins.
+# score is normalized 0.0–1.0; null max means "any remaining".
+token_weights:
+  - {max: 100,  score: 0.00}
+  - {max: 500,  score: 0.25}
+  - {max: 2000, score: 0.50}
+  - {max: 8000, score: 0.75}
+  - {max: null, score: 1.00}
+
+# Weights for the final complexity_score formula (must sum to 1.0).
+# complexity_score = sum(feature_value * weight) for each feature
+feature_weights:
+  keyword_hits:   0.35   # min(1.0, sum of matched keyword group weights)
+  token_length:   0.30   # from token_weights table
+  has_code_fence: 0.10   # 1.0 if ``` present, else 0.0
+  has_json_hint:  0.10   # 1.0 if json/format-as/output-as hint detected
+  need_json:      0.10   # 1.0 if GatewayRequest.need_json is True
+  n_sentences:    0.05   # min(1.0, n_sentences / 20)
+
+# Thresholds for complexity_label assignment.
+# simple : score <  simple threshold
+# medium : simple threshold <= score < medium threshold
+# hard   : score >= medium threshold
+thresholds:
+  simple: 0.35
+  medium: 0.65

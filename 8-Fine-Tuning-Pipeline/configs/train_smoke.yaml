@@ -1,0 +1,36 @@
+# Smoke-test config: same model/stack/LoRA setup as train.yaml, capped at 2 steps so it finishes
+# in about a minute. Proves the pipeline runs end-to-end; the resulting adapter is not meant to be
+# evaluated for real quality. See RUNBOOK.md.
+base_model_id: Qwen/Qwen3.5-0.8B
+
+train_file: data/processed/train.jsonl
+val_file: data/processed/val.jsonl
+prompt_file: configs/baseline_prompt.txt
+
+quantization: 4bit
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+    - in_proj_qkv
+    - out_proj
+
+seq_len: 512
+batch_size: 1
+grad_accum_steps: 8
+learning_rate: 2.0e-4
+epochs: 3
+warmup_ratio: 0.03
+
+max_steps: 2 # smoke test: caps training regardless of epochs/dataset size
+
+output_dir: outputs/adapters

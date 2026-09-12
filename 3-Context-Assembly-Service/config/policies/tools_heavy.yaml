@@ -1,0 +1,8 @@
+name: tools_heavy
+description: Prioritize tool schemas and results; useful for agentic flows
+output_pct: 0.20
+system_pct: 0.08
+caps:
+  memory: 0.20
+  docs:   0.25
+  tools:  0.55

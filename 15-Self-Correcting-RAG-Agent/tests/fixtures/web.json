@@ -1,0 +1,9 @@
+{
+  "question": [
+    {
+      "title": "Example Domain",
+      "url": "https://example.test/self-correcting-rag",
+      "snippet": "A pattern where an agent critiques its own retrieval before answering."
+    }
+  ]
+}

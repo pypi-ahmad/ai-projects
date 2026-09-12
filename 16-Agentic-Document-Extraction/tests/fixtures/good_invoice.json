@@ -1,0 +1,13 @@
+{
+  "invoice_number": "INV-1001",
+  "vendor": "Acme Supplies",
+  "invoice_date": "2026-09-01",
+  "currency": "USD",
+  "line_items": [
+    {"description": "Widget A", "quantity": 3, "unit_price": 10.00, "amount": 30.00},
+    {"description": "Widget B", "quantity": 2, "unit_price": 25.00, "amount": 50.00}
+  ],
+  "subtotal": 80.00,
+  "tax": 8.00,
+  "grand_total": 88.00
+}

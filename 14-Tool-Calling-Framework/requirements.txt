@@ -1,0 +1,18 @@
+pydantic==2.13.5
+pytest==9.1.1
+requests==2.34.2
+google-genai==2.23.0
+fastapi==0.141.1
+uvicorn==0.52.4
+streamlit==1.63.0
+
+# Install with: uv pip install -r requirements.txt
+#
+# requests: Ollama / OpenAI-compatible / Agnes AI HTTP calls (providers.py).
+# google-genai: official Gemini SDK -- its function-calling wire protocol
+# isn't simple enough to hand-roll safely like the other three (see
+# providers.py module docstring).
+# fastapi + uvicorn: HTTP surface (src/tools/api.py), served via
+# `python -m uvicorn src.tools.api:app`.
+# streamlit: UI (src/tools/ui.py), served via `streamlit run src/tools/ui.py`.
+# Both wired up together by run.cmd.

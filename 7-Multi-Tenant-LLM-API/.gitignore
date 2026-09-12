@@ -1,0 +1,15 @@
+# Local SQLite database
+data/app.db
+
+# Environment secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Any raw key shown once must never be pasted into a tracked file
+*.key
+*.secret

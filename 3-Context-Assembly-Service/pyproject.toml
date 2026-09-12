@@ -1,0 +1,11 @@
+[project]
+name = "context-assembly-service"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["tiktoken", "PyYAML", "streamlit>=1.35"]
+
+[tool.uv]
+dev-dependencies = ["pytest"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

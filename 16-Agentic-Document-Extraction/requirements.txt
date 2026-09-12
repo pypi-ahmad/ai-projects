@@ -1,0 +1,10 @@
+langchain-openai==1.6.2
+langchain-core==1.6.2
+langgraph==1.2.11
+pydantic==2.13.5
+python-dotenv==1.2.3
+pillow==12.3.0
+streamlit==1.63.0
+# Windows-native PDF page renderer -- verified in Phase 3 to pip-install
+# cleanly on native Windows with no Poppler/Docker dependency.
+pypdfium2==5.13.0

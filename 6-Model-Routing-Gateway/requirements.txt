@@ -1,0 +1,7 @@
+# Pinned direct dependencies — keep in sync with pyproject.toml
+# Install with: uv sync   (preferred)
+# Or:           pip install -r requirements.txt
+tiktoken==0.14.0
+PyYAML==6.0.3
+streamlit==1.63.0
+pydantic==2.13.5

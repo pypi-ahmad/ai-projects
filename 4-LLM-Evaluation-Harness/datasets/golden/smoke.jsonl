@@ -1,0 +1,5 @@
+{"id": "smoke-001", "suite": "smoke", "input": {"user": "What is 2+2?"}, "expected": {"answer": "4"}, "tags": ["smoke", "factual"]}
+{"id": "smoke-002", "suite": "smoke", "input": {"user": "Name the largest planet in the solar system."}, "expected": {"contains_any": ["Jupiter"]}, "tags": ["smoke", "contains"]}
+{"id": "smoke-003", "suite": "smoke", "input": {"user": "Describe what HTTP stands for without naming any specific web browser."}, "expected": {"forbidden_any": ["Chrome", "Firefox", "Safari"]}, "tags": ["smoke", "forbidden"]}
+{"id": "smoke-004", "suite": "smoke", "input": {"user": "Reply with a JSON object with a single key \"ok\" set to true.", "system": "Respond with JSON only, no prose."}, "expected": {"json_schema_name": "ok_flag"}, "tags": ["smoke", "json"]}
+{"id": "smoke-005", "suite": "smoke", "input": {"user": "Explain the tradeoffs of using a message queue versus a direct API call."}, "judge": {"rubric_id": "explanation_quality", "required": true}, "tags": ["smoke", "judge"]}

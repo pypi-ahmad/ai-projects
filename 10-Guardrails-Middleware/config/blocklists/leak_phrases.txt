@@ -1,0 +1,7 @@
+# Output, phrases suggesting the model is echoing internal instructions back.
+# Key-shaped-string leaks are already covered by the reused PII api_key
+# detector on output -- no separate pattern needed here. See docs/PII.md.
+here is your system prompt
+here are your instructions
+my system prompt is
+the instructions i was given are

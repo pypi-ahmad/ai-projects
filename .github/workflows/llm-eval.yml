@@ -1,0 +1,90 @@
+name: LLM evaluation harness
+
+on:
+  push:
+    paths:
+      - "4-LLM-Evaluation-Harness/**"
+      - ".github/workflows/llm-eval.yml"
+  pull_request:
+    paths:
+      - "4-LLM-Evaluation-Harness/**"
+      - ".github/workflows/llm-eval.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 4-LLM-Evaluation-Harness
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+        with:
+          enable-cache: true
+          cache-dependency-glob: 4-LLM-Evaluation-Harness/uv.lock
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run candidate
+        id: run
+        env:
+          AGNES_API_KEY: ${{ secrets.AGNES_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: |
+          set -euo pipefail
+          RUN_ID="ci-${{ github.run_id }}"
+          RUN_DIR="reports/$RUN_ID"
+          mkdir -p "$RUN_DIR"
+
+          if [ -n "${GOOGLE_API_KEY:-}" ]; then
+            echo "Cloud secrets found (gemini) -- running the real candidate+judge pipeline."
+            uv run python -m src.runners.candidate --dataset datasets/golden/smoke.jsonl \
+              --provider gemini --model gemini-3.5-flash-lite --out reports/ --run-id "$RUN_ID"
+            uv run python -m src.judge --candidates "$RUN_DIR/candidates.jsonl" \
+              --dataset datasets/golden/smoke.jsonl --provider gemini \
+              --model gemini-3.5-flash-lite --rubric answer_quality
+          elif [ -n "${AGNES_API_KEY:-}" ]; then
+            echo "Cloud secrets found (agnes) -- running the real candidate+judge pipeline."
+            uv run python -m src.runners.candidate --dataset datasets/golden/smoke.jsonl \
+              --provider agnes --model agnes-2.5-flash --out reports/ --run-id "$RUN_ID"
+            uv run python -m src.judge --candidates "$RUN_DIR/candidates.jsonl" \
+              --dataset datasets/golden/smoke.jsonl --provider agnes \
+              --model agnes-2.5-flash --rubric answer_quality
+          elif [ -n "${OPENAI_API_KEY:-}" ] && [ -n "${OPENAI_BASE_URL:-}" ]; then
+            echo "Cloud secrets found (openai-compatible) -- running the real candidate+judge pipeline."
+            uv run python -m src.runners.candidate --dataset datasets/golden/smoke.jsonl \
+              --provider openai_compatible --model gpt-5.6-luna --out reports/ --run-id "$RUN_ID"
+            uv run python -m src.judge --candidates "$RUN_DIR/candidates.jsonl" \
+              --dataset datasets/golden/smoke.jsonl --provider openai_compatible \
+              --model gpt-5.6-luna --rubric answer_quality
+          else
+            echo "No cloud provider secrets -- using the frozen candidate fixture (rule-only gate)."
+            cp tests/fixtures/frozen_candidates.jsonl "$RUN_DIR/candidates.jsonl"
+          fi
+
+          uv run python -m src.metrics --candidates "$RUN_DIR/candidates.jsonl" \
+            --dataset datasets/golden/smoke.jsonl --out "$RUN_DIR/rule_scores.jsonl"
+          uv run python -m src.eval --run "$RUN_DIR" --dataset datasets/golden/smoke.jsonl
+
+          echo "run_dir=$RUN_DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Upload run report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: 4-LLM-Evaluation-Harness/${{ steps.run.outputs.run_dir }}
+
+      - name: Evaluate gate
+        run: >
+          uv run python -m src.gate --run "${{ steps.run.outputs.run_dir }}"
+          --baseline baselines/current.json --config config/gate.yaml

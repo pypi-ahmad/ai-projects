@@ -1,0 +1,7 @@
+# Pinned direct dependencies — verified 2026-09-11
+# Preferred: uv sync (reads pyproject.toml and resolves the full lock)
+# pip fallback: pip install -r requirements.txt
+
+tiktoken==0.14.0
+PyYAML==6.0.3
+streamlit==1.63.0

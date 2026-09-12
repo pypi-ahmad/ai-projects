@@ -1,0 +1,10 @@
+# Per-type PII detection toggle. Missing keys fall back to the code default
+# (DEFAULT_PII_CONFIG in src/guardrails/pii.py). aadhaar/pan default off:
+# shape-only, unvalidated, "possible" matches -- see docs/PII.md.
+email: true
+phone: true
+credit_card: true
+ip_address: true
+api_key: true
+aadhaar: false
+pan: false

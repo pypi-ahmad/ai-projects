@@ -1,0 +1,12 @@
+# Pinned, in use.
+pydantic==2.13.5
+pytest==9.1.1
+qdrant-client==1.19.0
+pyyaml==6.0.3
+streamlit==1.63.0
+pandas==3.0.5
+python-dotenv==1.2.3
+
+# Not used -- we call Ollama's HTTP API directly via stdlib urllib
+# (src/embed/ollama_client.py, src/providers/generate.py), deliberately
+# avoiding this SDK. Left out on purpose, not an oversight.

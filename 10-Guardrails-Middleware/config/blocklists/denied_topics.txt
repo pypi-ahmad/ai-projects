@@ -1,0 +1,2 @@
+# Output, empty by default -- opt in by adding one exact phrase per line.
+# See docs/DETECTORS.md.

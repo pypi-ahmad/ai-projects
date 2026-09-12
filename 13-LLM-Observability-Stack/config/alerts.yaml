@@ -1,0 +1,40 @@
+# Alert rule thresholds, evaluated per (route, model). Rules with
+# enabled: false are implemented but off by default (see docs/ALERTS.md).
+cooldown_minutes: 30
+
+rules:
+  error_rate:
+    enabled: true
+    window_n: 50 # last N requests for this route+model
+    threshold: 0.2 # fires when error_rate > threshold
+    severity: critical
+
+  latency_regression:
+    enabled: true
+    window_n: 50 # current-window sample size
+    k: 2.0 # fires when current p95 > k * baseline p95
+    severity: warning
+
+  cost_sum_hour:
+    enabled: true
+    budget_usd: 1.0 # fires when current-UTC-hour cost sum > budget_usd
+    severity: warning
+
+  ttft_p50:
+    enabled: true
+    window_n: 50
+    threshold_ms: 2000
+    severity: warning
+
+  traffic_drop:
+    enabled: false
+    window_minutes: 15
+    baseline_window_minutes: 60
+    drop_ratio: 0.2 # fires when current count < drop_ratio * baseline count
+    severity: warning
+
+  unpriced_burst:
+    enabled: false
+    window_n: 50
+    threshold: 0.5 # fires when unpriced fraction of usage rows > threshold
+    severity: info

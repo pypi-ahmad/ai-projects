@@ -1,0 +1,21 @@
+# Tunable caps and thresholds for the memory pipeline (Orchestrator.tick()).
+# Loaded by src/memory/orchestrator.py:load_memory_config(). Missing keys
+# fall back to the defaults on MemoryConfig -- this file only needs to list
+# what you're overriding.
+#
+# Working memory's token_cap is NOT here -- it belongs to the WorkingMemory
+# instance itself (constructor arg), which the Orchestrator doesn't create.
+# DistillResult's 5-fact cap is likewise fixed in compress.py, not tunable
+# here (an earlier draft of this file had unused working/distill.max_facts
+# keys that nothing ever read -- removed in Phase 7).
+
+episodic:
+  max_rows: 500
+  max_age_days: 30
+  salience_threshold: 0.6
+
+semantic:
+  near_dup_threshold: 0.92
+
+distill:
+  recent_episodes_n: 20

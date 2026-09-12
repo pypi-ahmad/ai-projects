@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.playwright-mcp/
+.env
+data/registry.db
+data/outcomes.jsonl
+data/prompts/*
+!data/prompts/.gitkeep

@@ -1,0 +1,19 @@
+id: answer_quality
+version: 1
+dimensions:
+  - name: correctness
+    description: Is the answer factually correct and free of hallucination?
+    weight: 0.35
+  - name: completeness
+    description: >-
+      Does the answer fully address the question, without leaving out important parts?
+    weight: 0.25
+  - name: groundedness_if_context
+    description: >-
+      If context was given to the assistant, is the answer fully supported by it with no
+      unsupported claims? If no context was given, score this 1.0.
+    weight: 0.2
+  - name: instruction_following
+    description: >-
+      Does the answer follow explicit instructions in the prompt (format, constraints, tone)?
+    weight: 0.2

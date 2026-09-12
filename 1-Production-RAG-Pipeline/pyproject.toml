@@ -1,0 +1,40 @@
+[project]
+name = "rag-pipeline"
+version = "0.1.0"
+description = "Local-first hybrid RAG pipeline for an RTX 4060 8GB, multi-provider LLM UI"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "bm25s>=0.3.11",
+    "google-genai>=2.23.0",
+    "langdetect>=1.0.9",
+    "ollama>=0.6.2",
+    "openai>=3.13.0",
+    "pydantic-settings>=2.15.0",
+    "pymupdf>=1.28.2",
+    "python-docx>=1.2.0",
+    "qdrant-client>=1.19.0",
+    "streamlit>=1.63.0",
+    "tokenizers>=0.23.2",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.12,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ty.environment]
+python-version = "3.13"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.7",
+    "ty>=0.0.80",
+]

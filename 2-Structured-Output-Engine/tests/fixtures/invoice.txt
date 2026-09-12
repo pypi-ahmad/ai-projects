@@ -1,0 +1,7 @@
+Invoice from Acme Supplies, dated January 15, 2026. Billed in USD.
+
+Line items:
+- Widgets: 10 units at $2.50 each, total $25.00
+- Shipping: 1 unit at $5.00 each, total $5.00
+
+Total amount due: $30.00

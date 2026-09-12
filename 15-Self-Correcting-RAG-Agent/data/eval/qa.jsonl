@@ -1,0 +1,6 @@
+{"id": "q1", "question": "What internal tool does the security team use to track incident response?", "category": "in_corpus", "expected_source": "security-incident.md"}
+{"id": "q2", "question": "How many vacation days do full-time employees get per year?", "category": "in_corpus", "expected_source": "pto-policy.md"}
+{"id": "q3", "question": "What VPN client is required for remote access to internal systems?", "category": "in_corpus", "expected_source": "vpn-setup.md"}
+{"id": "q4", "question": "What is the CEO's favorite color?", "category": "out_of_corpus", "expected_source": null}
+{"id": "q5", "question": "What was the company's revenue last quarter?", "category": "out_of_corpus", "expected_source": null}
+{"id": "q6", "question": "Who signs off on discretionary days away from work before they're confirmed?", "category": "needs_rewrite", "expected_source": "pto-policy.md"}

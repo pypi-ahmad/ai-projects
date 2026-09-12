@@ -1,0 +1,174 @@
+<!--
+  Static demo of the browser-native EventSource path against stream.api.
+  Responsible for: Start/Reconnect/Disconnect against /v1/stream/*, showing
+  client-side TTFT. Not responsible for the SSE wire format itself (that's
+  stream.sse) -- this only reads event:/data: lines EventSource already
+  parsed for it. Served by stream.api's GET /client.html, so same-origin;
+  it will not work correctly opened as a bare file:// page (fetch()/
+  EventSource calls below are relative to http://127.0.0.1:8000).
+  Next file to read: src/stream/api.py.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>SSE client demo</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 760px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+  h1 { font-size: 1.25rem; }
+  p.sub { color: #555; margin-top: -0.5rem; }
+  .row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; align-items: center; flex-wrap: wrap; }
+  input, select { padding: 0.4rem; border: 1px solid #ccc; border-radius: 4px; }
+  button { padding: 0.4rem 0.9rem; border-radius: 4px; border: 1px solid #888; background: #f4f4f4; cursor: pointer; }
+  button:disabled { opacity: 0.5; cursor: default; }
+  #tokens { white-space: pre-wrap; border: 1px solid #ccc; border-radius: 6px; padding: 1rem; min-height: 4rem; background: #fafafa; }
+  #status { color: #555; }
+  .metric { font-weight: 600; }
+</style>
+</head>
+<body>
+<h1>Streaming Response Infrastructure</h1>
+<p class="sub">Browser-native <code>EventSource</code> demo -- no framework, no rerun model in the way.</p>
+
+<div class="row">
+  <label for="provider">Provider</label>
+  <select id="provider">
+    <option value="fake">fake</option>
+    <option value="ollama">ollama</option>
+    <option value="openai_compatible">openai_compatible</option>
+    <option value="agnes">agnes</option>
+    <option value="gemini">gemini</option>
+  </select>
+  <input id="model" placeholder="model (e.g. qwen3.5:0.8b) -- ignored for fake" />
+</div>
+<div class="row">
+  <input id="prompt" style="flex: 1; min-width: 20rem" value="Reply with exactly one short sentence." />
+</div>
+<div class="row">
+  <button id="start">Start stream</button>
+  <button id="reconnect" disabled>Reconnect from last-event-id</button>
+  <button id="disconnect" disabled>Disconnect (simulate a drop)</button>
+</div>
+<div class="row"><span id="status">idle</span></div>
+<div class="row">
+  <span class="metric">TTFT (client, this connection):</span>&nbsp;<span id="ttft">--</span>
+</div>
+<div class="row" id="server-metrics-row" style="display: none">
+  <span class="metric">Server metrics:</span>&nbsp;<span id="server-metrics"></span>
+</div>
+<div id="tokens"></div>
+
+<script>
+let es = null;
+let sseUrl = null;
+let sessionId = null;
+let lastEventId = 0;
+let connectStartMs = null;
+let gotFirstToken = false;
+
+const tokensEl = document.getElementById("tokens");
+const statusEl = document.getElementById("status");
+const ttftEl = document.getElementById("ttft");
+const reconnectBtn = document.getElementById("reconnect");
+const disconnectBtn = document.getElementById("disconnect");
+const serverMetricsRow = document.getElementById("server-metrics-row");
+const serverMetricsEl = document.getElementById("server-metrics");
+
+function setStatus(text) {
+  statusEl.textContent = text;
+}
+
+async function showServerMetrics() {
+  if (!sessionId) return;
+  const res = await fetch("/v1/metrics/" + sessionId);
+  if (!res.ok) return;
+  const m = await res.json();
+  serverMetricsRow.style.display = "";
+  serverMetricsEl.textContent =
+    "ttft_ms=" + m.ttft_ms + ", tokens=" + m.tokens + ", done_reason=" + m.done_reason;
+}
+
+function attach(url) {
+  if (es) es.close();
+  es = new EventSource(url);
+  connectStartMs = performance.now();
+  gotFirstToken = false;
+  setStatus("connecting: " + url);
+
+  es.onopen = () => setStatus("connected");
+
+  es.addEventListener("token", (ev) => {
+    lastEventId = Number(ev.lastEventId) || lastEventId;
+    if (!gotFirstToken) {
+      gotFirstToken = true;
+      const ttftMs = performance.now() - connectStartMs;
+      ttftEl.textContent = ttftMs.toFixed(1) + " ms (EventSource open -> first token, network included)";
+    }
+    tokensEl.textContent += ev.data;
+  });
+
+  es.addEventListener("done", (ev) => {
+    lastEventId = Number(ev.lastEventId) || lastEventId;
+    setStatus("done");
+    es.close();
+    reconnectBtn.disabled = false;
+    disconnectBtn.disabled = true;
+    showServerMetrics();
+  });
+
+  es.addEventListener("error", (ev) => {
+    // Fires for both our own named `error` SSE event (has .data) and a
+    // transport-level failure (a plain Event -- .data is undefined).
+    if (ev.data !== undefined) {
+      lastEventId = Number(ev.lastEventId) || lastEventId;
+      setStatus("server error: " + ev.data);
+    } else {
+      setStatus("connection error -- EventSource will retry automatically");
+    }
+  });
+
+  reconnectBtn.disabled = false;
+  disconnectBtn.disabled = false;
+}
+
+document.getElementById("start").addEventListener("click", async () => {
+  tokensEl.textContent = "";
+  ttftEl.textContent = "--";
+  serverMetricsRow.style.display = "none";
+  lastEventId = 0;
+
+  const provider = document.getElementById("provider").value;
+  const model = document.getElementById("model").value || provider;
+  const prompt = document.getElementById("prompt").value;
+
+  setStatus("starting...");
+  const res = await fetch("/v1/stream/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ provider, model, messages: [{ role: "user", content: prompt }] }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    setStatus("start failed (" + res.status + "): " + (body.detail || res.statusText));
+    return;
+  }
+  const body = await res.json();
+  sessionId = body.session_id;
+  sseUrl = body.sse_url;
+  attach(sseUrl);
+});
+
+document.getElementById("reconnect").addEventListener("click", () => {
+  if (!sseUrl) return;
+  // A real EventSource can't set a Last-Event-ID header by hand -- that's
+  // exactly why the server also accepts ?last_event_id= (see docs/API.md).
+  attach(sseUrl + "?last_event_id=" + lastEventId);
+});
+
+document.getElementById("disconnect").addEventListener("click", () => {
+  if (es) es.close();
+  setStatus("disconnected by you at last-event-id=" + lastEventId + " -- click Reconnect to resume");
+});
+</script>
+</body>
+</html>

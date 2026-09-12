@@ -1,0 +1,31 @@
+# Semantic Cache Layer -- policy config (docs/CACHE_POLICY.md).
+# Loaded by src/policy/config.py. A missing file falls back to these same
+# values (src/policy/config.py's PolicyConfig defaults), so this file
+# documents the defaults as much as it sets them.
+
+# Cosine similarity a lookup's top match must reach to count as a hit.
+threshold: 0.89
+
+# Seconds after created_at an entry stops being served as a hit. 0 = never expires.
+ttl_seconds: 0
+
+# Per-namespace cap. When a put() pushes a namespace over this, entries
+# are evicted oldest-by-last_hit_at first (never-hit entries fall back to
+# created_at). 0 = unlimited.
+max_entries: 10000
+
+# Reject put() if the answer is shorter than this after stripping
+# whitespace -- guards against caching empty/truncated/error strings.
+min_answer_chars: 3
+
+# Reject put() if the answer matches any of these regexes. Case
+# sensitivity is each pattern's own choice (via inline (?i)), not global.
+never_cache_regexes:
+  - '(?i)api[-_ ]?key'
+  - '(?i)\b(secret|password|passwd)\b\s*[:=]'
+  - '\b\d{4}[ -]?\d{4}[ -]?\d{4}[ -]?\d{4}\b'
+
+# If true, get(..., producer_model=X) only returns answers produced by X.
+# If false, producer_model is recorded but not enforced as a filter --
+# cross-model serving is allowed (docs/CACHE_POLICY.md).
+require_same_producer_model: true

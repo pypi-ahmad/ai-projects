@@ -1,0 +1,45 @@
+[project]
+name = "guardrails-middleware"
+version = "0.1.0"
+description = "Input/output filtering, PII redaction, and injection detection for LLM calls"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.141.1",
+    "pydantic>=2.13.5",
+    "pyyaml>=6.0.3",
+    "streamlit>=1.63.0",
+    "uvicorn[standard]>=0.52.4",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.13,<0.13"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "guardrails"
+
+[dependency-groups]
+dev = [{include-group = "lint"}, {include-group = "test"}]
+lint = ["ruff", "ty"]
+test = [
+    "httpx2>=2.12.0",
+    "pytest",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["D", "COM812", "ISC001", "CPY001"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "INP001", "TRY003", "EM101", "ARG002", "PLR2004", "FBT001", "FBT002", "SLF001"]
+"src/guardrails/rules.py" = ["RUF001"]  # homoglyph map's whole point is these ambiguous chars
+
+[tool.ty.environment]
+python-version = "3.13"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

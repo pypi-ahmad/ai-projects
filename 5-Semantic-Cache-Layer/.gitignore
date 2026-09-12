@@ -1,0 +1,21 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Qdrant embedded storage, its index metadata, and the metrics log --
+# runtime state local to each machine, not source; keep the folder via .gitkeep
+data/cache/qdrant/
+data/cache/index_meta.json
+data/cache/metrics.jsonl
+
+# Streamlit
+.streamlit/
+
+# OS
+Thumbs.db

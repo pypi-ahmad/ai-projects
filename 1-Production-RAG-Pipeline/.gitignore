@@ -1,0 +1,18 @@
+# Virtual environment
+.venv/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Generated indexes (persisted per-machine, not versioned)
+data/indexes/*
+!data/indexes/.gitkeep
+
+# Python bytecode cache
+__pycache__/
+*.pyc
+
+# Streamlit local secrets
+.streamlit/secrets.toml

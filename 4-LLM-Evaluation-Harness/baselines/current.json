@@ -1,0 +1,73 @@
+{
+  "summary": {
+    "run_id": "think-fix-check",
+    "dataset_path": "datasets\\golden\\smoke.jsonl",
+    "dataset_hash": "d25b2c38532591d2506eb177d466fd2679a4ec9e4d04e3f20d825850a52743b0",
+    "n_cases": 5,
+    "n_error": 0,
+    "mean_rule_pass_rate": 0.75,
+    "mean_judge_overall": 0.95,
+    "p95_latency_ms": 8159.58105999889,
+    "by_suite": {
+      "smoke": {
+        "n_cases": 5,
+        "n_error": 0,
+        "mean_rule_pass_rate": 0.75,
+        "mean_judge_overall": 0.95,
+        "p95_latency_ms": 8159.58105999889
+      }
+    },
+    "by_tag": {
+      "contains": {
+        "n_cases": 1,
+        "n_error": 0,
+        "mean_rule_pass_rate": 1.0,
+        "mean_judge_overall": null,
+        "p95_latency_ms": 160.65270000399323
+      },
+      "factual": {
+        "n_cases": 1,
+        "n_error": 0,
+        "mean_rule_pass_rate": 0.0,
+        "mean_judge_overall": null,
+        "p95_latency_ms": 3442.9229000015766
+      },
+      "forbidden": {
+        "n_cases": 1,
+        "n_error": 0,
+        "mean_rule_pass_rate": 1.0,
+        "mean_judge_overall": null,
+        "p95_latency_ms": 126.9763000018429
+      },
+      "json": {
+        "n_cases": 1,
+        "n_error": 0,
+        "mean_rule_pass_rate": 1.0,
+        "mean_judge_overall": null,
+        "p95_latency_ms": 97.26239999872632
+      },
+      "judge": {
+        "n_cases": 1,
+        "n_error": 0,
+        "mean_rule_pass_rate": null,
+        "mean_judge_overall": 0.95,
+        "p95_latency_ms": 9338.74559999822
+      },
+      "smoke": {
+        "n_cases": 5,
+        "n_error": 0,
+        "mean_rule_pass_rate": 0.75,
+        "mean_judge_overall": 0.95,
+        "p95_latency_ms": 8159.58105999889
+      }
+    }
+  },
+  "config": {
+    "candidate_provider": "ollama",
+    "candidate_model": "granite4.1:3b",
+    "judge_provider": "ollama",
+    "judge_model": "qwen3.5:2b",
+    "dataset_path": "datasets\\golden\\smoke.jsonl",
+    "dataset_hash": "d25b2c38532591d2506eb177d466fd2679a4ec9e4d04e3f20d825850a52743b0"
+  }
+}

@@ -1,0 +1,12 @@
+.venv/
+.env
+data/inbox/*
+!data/inbox/.gitkeep
+data/crops/*
+!data/crops/.gitkeep
+data/parse/*
+!data/parse/.gitkeep
+data/annotated/*
+!data/annotated/.gitkeep
+__pycache__/
+*.pyc

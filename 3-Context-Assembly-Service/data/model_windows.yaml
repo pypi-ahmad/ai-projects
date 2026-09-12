@@ -1,0 +1,40 @@
+# Context window table — edit freely to add models or correct values.
+# null means context_window must be passed explicitly in ContextRequest.
+# All token counts are the native model limit; tiktoken cl100k_base counts
+# are approximate for Ollama GGUF quantized versions (typically ±5%).
+
+models:
+
+  # ── Local Ollama models — verified 2026-09-11 ──────────────────────────
+  # Source: https://ollama.com/library/granite4.1
+  granite4.1:3b:
+    context_window: 131072    # 128 K
+
+  # Source: https://ollama.com/library/qwen3.5
+  qwen3.5:2b:
+    context_window: 262144    # 256 K
+
+  qwen3.5:0.8b:
+    context_window: 262144    # 256 K
+
+  # ── Cloud providers — not independently verified ───────────────────────
+  # Pass context_window in ContextRequest until these are confirmed.
+  agnes-2.5-flash:
+    context_window: null
+    note: Contact Agnes AI for limit; https://apihub.agnes-ai.com
+
+  gpt-5.6-luna:
+    context_window: null
+    note: Verify with OPENAI_BASE_URL provider
+
+  gpt-5.6-terra:
+    context_window: null
+    note: Verify with OPENAI_BASE_URL provider
+
+  gemini-3.5-flash-lite:
+    context_window: null
+    note: See https://ai.google.dev/gemini-api/docs/models
+
+  gemini-3.7-flash:
+    context_window: null
+    note: See https://ai.google.dev/gemini-api/docs/models

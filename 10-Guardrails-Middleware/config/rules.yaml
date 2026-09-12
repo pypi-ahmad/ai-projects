@@ -1,0 +1,28 @@
+# Per-category enabled/severity for Phase 4 input/output rule detectors.
+# Severity: info | warn | block.
+#
+# "standard" policy (docs/POLICIES.md): injection-like input categories default
+# to "block"; output categories default to "warn" (transform, never block) --
+# matching the project-wide rule that the outbound chain redacts, it doesn't
+# censor (docs/ARCHITECTURE.md).
+input:
+  max_chars:
+    enabled: true
+    limit: 8000
+    severity: block
+  blocklist:
+    enabled: true
+    severity: block
+  control_char:
+    enabled: true
+    severity: block
+  encoding_evasion:
+    enabled: true
+    severity: block
+output:
+  leak_pattern:
+    enabled: true
+    severity: warn
+  denied_topics:
+    enabled: true
+    severity: warn

@@ -1,0 +1,110 @@
+# Tier → ordered target list with routing constraints.
+#
+# Each target:
+#   provider         : ollama | agnes | openai | gemini
+#   model            : model name (Ollama: must be in allowed list)
+#   max_input_tokens : hard cap for this target; router may enforce before call
+#   timeout_s        : generation timeout (used by Phase 4 provider adapters)
+#   vision_ok        : true → eligible for requests with flags.has_image=true
+#                      false → skipped when flags.has_image=true
+#   allowed_when:
+#     min_score      : minimum complexity_score (inclusive)
+#     max_score      : maximum complexity_score (inclusive)
+#     flags          : list of RequestFlags fields that must ALL be true
+#
+# fallbacks: tiers to try (in order) after all targets in this tier are exhausted.
+# Promotion is only upward (lite → mid → heavy). Never configure a lower tier here.
+#
+# Hard rules enforced in code (not config):
+#   - complexity_label=="hard" AND need_json==true → lite targets ineligible
+#   - flags.has_image==true → only vision_ok targets eligible; if none → UNSUPPORTED
+
+tiers:
+  lite:
+    description: "Short, cheap, low-risk tasks"
+    targets:
+      - provider: ollama
+        model: qwen3.5:0.8b
+        max_input_tokens: 4096
+        timeout_s: 30
+        vision_ok: false
+        allowed_when:
+          min_score: 0.0
+          max_score: 1.0
+          flags: []
+    fallbacks:
+      - mid
+
+  mid:
+    description: "Default production tasks"
+    targets:
+      - provider: ollama
+        model: qwen3.5:2b
+        max_input_tokens: 8192
+        timeout_s: 60
+        vision_ok: false
+        allowed_when:
+          min_score: 0.0
+          max_score: 1.0
+          flags: []
+      - provider: ollama
+        model: qwen3-vl:2b       # vision model — also handles text-only tasks
+        max_input_tokens: 4096
+        timeout_s: 60
+        vision_ok: true
+        allowed_when:
+          min_score: 0.0
+          max_score: 1.0
+          flags: []
+      - provider: ollama
+        model: granite4.1:3b
+        max_input_tokens: 8192
+        timeout_s: 60
+        vision_ok: false
+        allowed_when:
+          min_score: 0.0
+          max_score: 1.0
+          flags: []
+    fallbacks:
+      - heavy
+
+  heavy:
+    description: "Hard / long / structured-output tasks"
+    targets:
+      - provider: agnes
+        model: agnes-2.5-flash
+        max_input_tokens: 32768
+        timeout_s: 120
+        vision_ok: false
+        allowed_when:
+          min_score: 0.0
+          max_score: 1.0
+          flags: []
+      - provider: openai
+        model: gpt-5.6-luna
+        max_input_tokens: 32768
+        timeout_s: 120
+        vision_ok: false
+        allowed_when:
+          min_score: 0.0
+          max_score: 1.0
+          flags: []
+      - provider: gemini
+        model: gemini-3.7-flash
+        max_input_tokens: 32768
+        timeout_s: 120
+        vision_ok: true
+        allowed_when:
+          min_score: 0.0
+          max_score: 1.0
+          flags: []
+      - provider: ollama
+        model: granite4.1:3b    # last resort when no cloud keys present
+        max_input_tokens: 8192
+        timeout_s: 60
+        vision_ok: false
+        allowed_when:
+          min_score: 0.0
+          max_score: 1.0
+          flags: []
+    fallbacks: []               # no higher tier; exhausted → unavailable

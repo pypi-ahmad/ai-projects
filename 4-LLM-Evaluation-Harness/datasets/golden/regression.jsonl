@@ -1,0 +1,10 @@
+{"id": "regression-001", "suite": "regression", "input": {"user": "What is 10 times 10?"}, "expected": {"answer": "100"}, "tags": ["regression", "math"]}
+{"id": "regression-002", "suite": "regression", "input": {"user": "What is the chemical symbol for gold?"}, "expected": {"contains_any": ["Au"]}, "tags": ["regression", "factual"]}
+{"id": "regression-003", "suite": "regression", "input": {"user": "What color is a clear daytime sky?"}, "expected": {"contains_any": ["blue"]}, "tags": ["regression", "factual"]}
+{"id": "regression-004", "suite": "regression", "input": {"user": "Summarize the plot of Romeo and Juliet in one sentence, without naming any real actor."}, "expected": {"forbidden_any": ["Leonardo DiCaprio", "Claire Danes"]}, "tags": ["regression", "forbidden"]}
+{"id": "regression-005", "suite": "regression", "input": {"user": "Give me an order confirmation number in the format ORD-##### (5 digits)."}, "expected": {"regex": "ORD-\\d{5}"}, "tags": ["regression", "format"]}
+{"id": "regression-006", "suite": "regression", "input": {"user": "Reply with a JSON object with a single key \"status\" set to \"ok\".", "system": "Respond with JSON only, no prose."}, "expected": {"json_schema_name": "status_ok"}, "tags": ["regression", "json"]}
+{"id": "regression-007", "suite": "regression", "input": {"user": "What is the boiling point of water in Celsius at sea level?"}, "expected": {"answer": "100"}, "tags": ["regression", "math"]}
+{"id": "regression-008", "suite": "regression", "input": {"user": "Name one prime number less than 10."}, "expected": {"contains_any": ["2", "3", "5", "7"]}, "tags": ["regression", "factual"]}
+{"id": "regression-009", "suite": "regression", "input": {"user": "Explain in a few sentences why automated testing matters in software engineering."}, "judge": {"rubric_id": "answer_quality", "required": true}, "tags": ["regression", "judge"]}
+{"id": "regression-010", "suite": "regression", "input": {"user": "Describe a good pet for a small apartment, without using the word \"cat\"."}, "expected": {"forbidden_any": ["cat"]}, "tags": ["regression", "forbidden"]}

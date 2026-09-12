@@ -1,0 +1,39 @@
+[project]
+name = "8-fine-tuning-pipeline"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "accelerate>=1.15.0",
+    "bitsandbytes>=0.50.2",
+    "datasets>=5.0.1",
+    "huggingface-hub>=1.31.0",
+    "pandas>=3.0.5",
+    "peft>=0.20.0",
+    "pydantic>=2.13.5",
+    "pyyaml>=6.0.3",
+    "requests>=2.34.2",
+    "streamlit>=1.63.0",
+    "torch>=2.14.0",
+    "torchvision>=0.29.0",
+    "transformers>=5.17.0",
+    "trl>=1.13.0",
+]
+
+# PyPI's win_amd64 torch/torchvision wheels are CPU-only; without this override `uv sync` would
+# silently install CPU-only builds on Windows. See docs/STACK.md / docs/TECHNICAL.md.
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu130", marker = "sys_platform == 'win32'" }]
+torchvision = [{ index = "pytorch-cu130", marker = "sys_platform == 'win32'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

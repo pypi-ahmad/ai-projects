@@ -1,0 +1,9 @@
+{
+  "budget": 1000,
+  "blocks": [
+    {"name": "system",    "text": "You are a budget analyst.",              "family": "tools",  "priority": 100, "compress": false},
+    {"name": "memory-1",  "text": "User asked about Q3 last session.",      "family": "memory", "priority": 80,  "compress": false},
+    {"name": "doc-ref",   "text": "Q3 report: revenue $4.2M, costs $3.1M.", "family": "docs",   "priority": 60,  "compress": true},
+    {"name": "tool-calc", "text": "{\"name\": \"calculator\"}",             "family": "tools",  "priority": 70,  "compress": false}
+  ]
+}

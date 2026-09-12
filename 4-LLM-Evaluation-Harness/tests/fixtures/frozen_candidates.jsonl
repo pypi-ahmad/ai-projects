@@ -1,0 +1,5 @@
+{"case_id": "smoke-001", "text": "4", "model": "frozen-fixture", "provider": "frozen", "latency_ms": 0.0, "error": null}
+{"case_id": "smoke-002", "text": "Jupiter is the largest planet in the solar system.", "model": "frozen-fixture", "provider": "frozen", "latency_ms": 0.0, "error": null}
+{"case_id": "smoke-003", "text": "HTTP stands for Hypertext Transfer Protocol.", "model": "frozen-fixture", "provider": "frozen", "latency_ms": 0.0, "error": null}
+{"case_id": "smoke-004", "text": "{\"ok\": true}", "model": "frozen-fixture", "provider": "frozen", "latency_ms": 0.0, "error": null}
+{"case_id": "smoke-005", "text": "Message queues decouple sender and receiver for asynchronous, scalable communication, while direct API calls are simpler but synchronous and tightly coupled.", "model": "frozen-fixture", "provider": "frozen", "latency_ms": 0.0, "error": null}

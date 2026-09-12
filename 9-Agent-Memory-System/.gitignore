@@ -1,0 +1,24 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.pytest_cache/
+
+# Virtual environments
+.venv
+
+# Runtime memory data (SQLite + embedded Qdrant) -- keep the folder via .gitkeep
+data/memory/*
+!data/memory/.gitkeep
+
+# Streamlit local secrets
+.streamlit/secrets.toml
+
+# Real env values never get committed
+.env
+
+# Playwright MCP scratch snapshots/logs from manual UI verification
+.playwright-mcp/

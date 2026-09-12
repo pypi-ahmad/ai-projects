@@ -1,0 +1,5 @@
+[server]
+port = 7012
+
+[theme]
+base = "dark"

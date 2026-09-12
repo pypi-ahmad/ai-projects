@@ -1,0 +1,22 @@
+# Environment secrets
+.env
+
+# Sandboxed tool run artifacts
+data/sandbox/*/
+!data/sandbox/.gitkeep
+
+# Run logs
+data/logs/*.jsonl
+!data/logs/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Browser-testing tool scratch output
+.playwright-mcp/
+
+# Any raw key shown once must never be pasted into a tracked file
+*.key
+*.secret

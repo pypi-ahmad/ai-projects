@@ -1,0 +1,58 @@
+[project]
+name = "llm-observability-stack"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "altair>=6.2.2",
+    "fastapi>=0.141.1",
+    "pandas>=3.0.5",
+    "pydantic>=2.13.5",
+    "pyyaml>=6.0.3",
+    "requests>=2.34.2",
+    "streamlit>=1.63.0",
+    "uvicorn>=0.52.4",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.13,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "obs"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest",
+    "ruff",
+    "ty",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["D", "COM812", "ISC001", "CPY001"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "PLR2004", "INP001", "EM101", "PT012"]
+"src/obs/trace/tracer.py" = ["ANN401"]
+"src/obs/export/__main__.py" = ["T201"]
+"src/obs/alerts/eval.py" = ["T201"]
+# Severity is a pydantic field type: moving it to TYPE_CHECKING breaks model
+# construction at runtime under `from __future__ import annotations` (verified).
+"src/obs/alerts/models.py" = ["TC001"]
+# route/model/limit/since/until/db_path are all independently needed by callers.
+"src/obs/alerts/stats.py" = ["PLR0913"]
+# Fixed http://localhost:11434 base URL, not attacker-controlled input.
+"src/obs/providers/ollama.py" = ["S310"]
+# Demo/dev script: non-crypto randomness, print is the point, not a package.
+"scripts/*" = ["S311", "T201", "INP001", "TRY301"]
+
+[tool.ty.environment]
+python-version = "3.13"

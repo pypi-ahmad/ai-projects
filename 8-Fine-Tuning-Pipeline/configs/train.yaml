@@ -1,0 +1,39 @@
+# Phase 4 training config. base_model_id is the HF twin confirmed in docs/STACK.md.
+base_model_id: Qwen/Qwen3.5-0.8B
+
+train_file: data/processed/train.jsonl
+val_file: data/processed/val.jsonl
+prompt_file: configs/baseline_prompt.txt # same frozen system prompt used by the eval baseline
+
+# 4bit | 8bit | fp16 — run.py probes bitsandbytes at runtime and downgrades if this doesn't work;
+# on downgrade to fp16 it also forces seq_len=256, batch_size=1 regardless of the values below.
+quantization: 4bit
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  # Qwen3.5-0.8B is a hybrid architecture (see docs/STACK.md): only 6/24 layers use standard
+  # self_attn (q/k/v/o_proj); the other 18 use a Qwen3_5GatedDeltaNet linear-attention block
+  # (in_proj_qkv/out_proj + gating projections we deliberately leave frozen: in_proj_z/b/a,
+  # conv1d, norm). Targeting only q/k/v/o would silently skip 3/4 of the model's token-mixing
+  # layers. gate/up/down_proj (mlp) exist in all 24 layers.
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+    - in_proj_qkv
+    - out_proj
+
+seq_len: 512
+batch_size: 1
+grad_accum_steps: 8
+learning_rate: 2.0e-4
+epochs: 3
+warmup_ratio: 0.03
+
+output_dir: outputs/adapters

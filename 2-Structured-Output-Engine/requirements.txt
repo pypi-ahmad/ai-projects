@@ -1,0 +1,14 @@
+# Pinned to what this project is developed and tested against
+# (pyproject.toml / uv.lock is the source of truth for development;
+# this file is what run.cmd's plain `pip install` path uses for end users).
+# Regenerate the pins with: uv export --no-hashes --format requirements-txt --no-dev
+httpx==0.28.1
+pydantic[email]==2.13.5
+streamlit==1.63.0
+
+# Optional OCR path (src/engine/file_input.py) — not installed by default,
+# lazily imported, and the rest of the app works without them. See
+# docs/RUNBOOK.md "Extract from file" to opt in:
+# paddlepaddle
+# paddleocr[doc-parser]
+# pymupdf

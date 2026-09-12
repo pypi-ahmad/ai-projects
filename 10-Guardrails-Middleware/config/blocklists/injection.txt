@@ -1,0 +1,8 @@
+# Input, generic categories only -- not an exploit cookbook. See docs/DETECTORS.md.
+# One phrase per line (case-insensitive substring), or "regex: <pattern>" for a regex line.
+ignore previous instructions
+ignore all previous instructions
+disregard the above
+system prompt
+dump all passwords
+print your credentials

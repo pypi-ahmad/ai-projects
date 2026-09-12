@@ -1,0 +1,4 @@
+{"id": "q1", "question": "What gas do plants release as a byproduct of photosynthesis?", "relevant_sources": [{"source_path": "sample/photosynthesis.txt", "page": 1}], "gold_answer": "Oxygen."}
+{"id": "q2", "question": "Why do most coastlines get two high tides and two low tides a day?", "relevant_sources": [{"source_path": "sample/ocean-tides.txt", "page": 1}], "gold_answer": "Because Earth rotates through two tidal bulges roughly once a day."}
+{"id": "q3", "question": "What causes spring tides?", "relevant_sources": [{"source_path": "sample/ocean-tides.txt", "page": 1}], "gold_answer": "The Sun and Moon roughly lining up during a new or full moon, so their gravitational pulls reinforce each other."}
+{"id": "q4", "question": "How does water get from the ocean into the atmosphere in the water cycle?", "relevant_sources": [{"source_path": "sample/water-cycle.txt", "page": 1}], "gold_answer": "Evaporation, powered by heat from the Sun."}

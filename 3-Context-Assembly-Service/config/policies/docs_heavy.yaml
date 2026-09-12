@@ -1,0 +1,8 @@
+name: docs_heavy
+description: Prioritize retrieved documents; useful for RAG-heavy flows
+output_pct: 0.20
+system_pct: 0.08
+caps:
+  memory: 0.15
+  docs:   0.70
+  tools:  0.15

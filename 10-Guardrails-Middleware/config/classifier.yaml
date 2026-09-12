@@ -1,0 +1,15 @@
+# Optional LLM classifier (Phase 5). Off by default -- rules-only detectors
+# (Phases 3-4) already run regardless of this file.
+use_llm_classifier: false
+require_classifier: false   # true = provider down blocks (via fail_mode); false = soft-skip
+threshold: 0.7               # block if classifier's injection score >= this
+provider: ollama
+host: http://localhost:11434
+model: qwen3.5:0.8b
+
+# Optional second lane: cosine similarity against 10 fixed reference phrases.
+# Off by default. See docs/DETECTORS.md.
+embedding_lane:
+  enabled: false
+  threshold: 0.85
+  model: qwen3-embedding:0.6b

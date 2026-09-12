@@ -1,0 +1,7 @@
+# Regression gate thresholds. See docs/GATES.md for the exact contract each
+# field implements -- nothing here should exist that isn't documented there.
+min_rule_pass_rate: 0.75
+min_judge_overall: 0.7
+max_p95_latency_ms: 20000
+max_regression_delta: 0.05
+allow_missing_judge: true

@@ -1,0 +1,8 @@
+name: memory_heavy
+description: Prioritize conversation history and user memories
+output_pct: 0.20
+system_pct: 0.08
+caps:
+  memory: 0.55
+  docs:   0.30
+  tools:  0.15

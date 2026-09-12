@@ -1,0 +1,8 @@
+name: balanced
+description: Equal weight across all three families
+output_pct: 0.20
+system_pct: 0.08
+caps:
+  memory: 0.30
+  docs:   0.45
+  tools:  0.25

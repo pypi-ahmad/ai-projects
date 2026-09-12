@@ -1,0 +1,46 @@
+[project]
+name = "llm-eval-harness"
+version = "0.1.0"
+description = "LLM evaluation harness: golden dataset + deterministic metrics + LLM-as-judge + a CI regression gate"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "google-genai>=2.23.0",
+    "ollama>=0.6.2",
+    "openai>=3.13.0",
+    "pandas>=3.0.5",
+    "pydantic>=2.13.5",
+    "pydantic-settings>=2.15.0",
+    "pyyaml>=6.0.3",
+    "streamlit>=1.63.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.13,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ty.environment]
+python-version = "3.13"
+
+[tool.ty.src]
+# Type-check src/ only -- tests/ leans heavily on monkeypatching real classes
+# (e.g. swapping ollama.Client for a fake), which is correct at runtime but
+# not something a static checker can verify against the real annotations.
+include = ["src"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.7",
+    "ty>=0.0.80",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

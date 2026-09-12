@@ -1,0 +1,12 @@
+# Pinned to what pyproject.toml/uv.lock actually resolve to, so run.cmd's
+# `pip install -r requirements.txt` on a plain venv (no `uv` installed) gets the
+# exact versions this repo is developed and tested against. uv.lock remains the
+# source of truth -- re-pin here (`uv pip list`) whenever it changes.
+google-genai==2.23.0
+ollama==0.6.2
+openai==3.13.0
+pandas==3.0.5
+pydantic==2.13.5
+pydantic-settings==2.15.0
+pyyaml==6.0.3
+streamlit==1.63.0
