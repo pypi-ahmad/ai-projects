@@ -24,7 +24,7 @@
   `salience >= salience_threshold` are never removed, even if the
   session stays over `max_rows`/`max_age_days`
   (`EpisodicMemory.evict()`, `episodic.py`). Unlike working memory, this
-  is a hard SQL `DELETE` -- there is no `CompressJob` equivalent for
+  is a hard SQL `DELETE`; there is no `CompressJob` equivalent for
   episodic eviction.
 - **`search_keyword` sanitizes its input.** The raw query is reduced to
   bare word tokens joined with `OR` (`_to_fts_query`, `episodic.py`)
@@ -36,7 +36,7 @@
   held by one long-lived object (e.g. `@st.cache_resource` in `ui.py`)
   across calls that may land on different threads.
 - **`DistillResult` allows zero facts.** `facts: list[str]` has no
-  minimum length (`compress.py`) -- an episode batch with nothing worth
+  minimum length (`compress.py`); an episode batch with nothing worth
   keeping is expected to distill to an empty list rather than pressure
   the model into inventing one.
 - **Near-duplicate facts are skipped, not merged.** Before inserting a
@@ -77,7 +77,7 @@ All runtime state lives under `data/memory/` (gitignored except
 
 | Path | Written by |
 |---|---|
-| `data/memory/working.json` | `WorkingMemory.snapshot()` (only called explicitly -- from `ui.py` after append/tick, and from `scripts/seed_demo.py`) |
+| `data/memory/working.json` | `WorkingMemory.snapshot()` (only called explicitly; from `ui.py` after append/tick, and from `scripts/seed_demo.py`) |
 | `data/memory/memory.db` | `EpisodicMemory`, on every `write()`/`evict()` (auto-committed) |
 | `data/memory/qdrant/` | `SemanticMemory`, on every `upsert_fact()`/`invalidate()` |
 | `data/memory/index_meta.json` | `SemanticMemory`, written once on first run (records `embed_model` and vector `dim`) |

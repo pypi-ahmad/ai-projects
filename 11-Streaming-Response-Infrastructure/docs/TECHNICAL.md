@@ -2,22 +2,22 @@
 
 ## Stack, and why (only where the code says so)
 
-- **FastAPI + Starlette + uvicorn** — the whole HTTP surface
+- **FastAPI + Starlette + uvicorn**; the whole HTTP surface
   (`src/stream/api.py`) is one `FastAPI()` app; `run.cmd` runs it via
   `uvicorn stream.api:app`. No reason for FastAPI specifically is stated in
   code; it's simply what `api.py` is built on.
-- **`httpx2`**, not `httpx` — every provider adapter and both consumers
+- **`httpx2`**, not `httpx`; every provider adapter and both consumers
   (`stream/ui.py`, the bench tool indirectly via adapters) import
   `httpx2 as httpx`. `pyproject.toml` depends on `httpx2>=2.12.0` directly
   (main dependency, not a test-only one). No in-repo comment states why
   `httpx2` over `httpx`; `PHASES.md` records that Starlette's `TestClient`
   raised a deprecation warning pointing at `httpx2`, which is the traceable
   reason, but that reasoning lives in the project log, not the code itself.
-- **`pydantic`** — only used for `stream.api`'s two request models
+- **`pydantic`**; only used for `stream.api`'s two request models
   (`Message`, `StartRequest`), i.e. FastAPI's own request-body validation;
   it is a transitive dependency of FastAPI, not separately declared in
   `pyproject.toml`.
-- **Streamlit** — `src/stream/ui.py`'s own docstring states the reason
+- **Streamlit**; `src/stream/ui.py`'s own docstring states the reason
   directly: Streamlit's rerun model doesn't drive a browser `EventSource`
   well from Python, so it instead does a synchronous `httpx2` stream read
   inside a generator and renders it with `st.write_stream`.
@@ -37,12 +37,12 @@
   `after_id`".
 - **A session's terminal state is set exactly once.** `complete()` sets
   `done_reason = "complete"`; `fail(code)` sets `done_reason = code`.
-  Nothing in `stream.api` calls both for the same session — `_produce()`'s
+  Nothing in `stream.api` calls both for the same session; `_produce()`'s
   `try/except` calls `fail()` on any exception and returns, or falls
   through to `complete()` on success, never both (`src/stream/api.py`,
   `_produce`).
 - **`sse_format()` always emits at least one `data:` line**, even for an
-  empty `Event.data` (`src/stream/sse.py`, function docstring) — per the
+  empty `Event.data` (`src/stream/sse.py`, function docstring); per the
   SSE spec an event with no `data:` field at all never dispatches
   client-side, so `done`/`error` events (whose `data` can be empty) still
   need one.
@@ -66,11 +66,11 @@
   the API key in it.
 - **Malformed `Last-Event-ID`/`?last_event_id=` doesn't error.**
   `_parse_after_id()` catches `ValueError` from `int(...)` and returns `0`
-  — treated the same as "no reconnect point given", not rejected
+ ; treated the same as "no reconnect point given", not rejected
   (`src/stream/api.py`).
 - **An unknown `session_id` on `GET /v1/stream/{id}`** returns `410` with
   one `error` SSE event (`data: session_expired`); on `GET
-  /v1/metrics/{id}` it returns `404` with `{"error": "not_found"}` — two
+  /v1/metrics/{id}` it returns `404` with `{"error": "not_found"}`; two
   different status codes for the same "not found" condition, because one
   route is a `text/event-stream` response and the other a plain JSON one
   (verified: both branches are in `src/stream/api.py`, not inferred).

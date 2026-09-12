@@ -9,7 +9,7 @@ Pydantic v2, `src/memory/working.py`.
 | `id` | `str` | defaults to `uuid4().hex` |
 | `role` | `"user" \| "assistant" \| "tool" \| "system"` | |
 | `text` | `str` | |
-| `token_count` | `int` | via `count_tokens()` — tiktoken `cl100k_base`, deterministic |
+| `token_count` | `int` | via `count_tokens()`; tiktoken `cl100k_base`, deterministic |
 | `ts` | `datetime` | defaults to `now(UTC)` |
 | `pinned` | `bool` | default `False`; pinned items are never evicted |
 | `source_id` | `str \| None` | optional back-reference, default `None` |
@@ -48,7 +48,7 @@ Pydantic v2, data only, `src/memory/episodic.py`.
 |---|---|---|
 | `max_rows` | `int \| None` | per-session cap, default `None` (no cap) |
 | `max_age_days` | `float \| None` | default `None` (no cap) |
-| `salience_threshold` | `float` | **no default** — caller must choose; rows with `salience >= threshold` are protected alongside pinned rows |
+| `salience_threshold` | `float` | **no default**; caller must choose; rows with `salience >= threshold` are protected alongside pinned rows |
 
 ## Fact
 
@@ -64,7 +64,7 @@ the full model is the Qdrant point's payload, keyed by `fact_id`.
 | `source_episode_id` | `str \| None` | default `None` |
 | `confidence` | `float` | `0.0`-`1.0`, default `0.5` (not spec-mandated, mirrors `Episode.salience`'s default) |
 | `namespace` | `str` | a `session_id`, or the literal string `"global"`; exact-match filter, no implicit union |
-| `invalidated_at` | `datetime \| None` | default `None`; neither `search()` nor `recall()` filters it out -- nothing reads this field yet |
+| `invalidated_at` | `datetime \| None` | default `None`; neither `search()` nor `recall()` filters it out; nothing reads this field yet |
 
 `index_meta.json` (`data/memory/index_meta.json`): `{"embed_model": str,
 "dim": int}`, written on first run from a live probe embedding. A later
@@ -95,15 +95,15 @@ defaults below).
 | `semantic.near_dup_threshold` | `0.92` | dedup cutoff during distill |
 | `distill.recent_episodes_n` | `20` | episodes considered per distill pass |
 
-No `working.token_cap` here -- `WorkingMemory`'s cap is a constructor arg on
+No `working.token_cap` here; `WorkingMemory`'s cap is a constructor arg on
 an instance the `Orchestrator` never creates itself, so a `MemoryConfig`
 field for it would never be wired to anything. (Phase 7 removed exactly
-that, plus an unused `distill.max_facts` -- the 5-fact cap lives on
+that, plus an unused `distill.max_facts`; the 5-fact cap lives on
 `DistillResult` in compress.py, nowhere else.)
 
 `MemoryReport`: `working_evicted`, `episodes_written`, `episodes_evicted`,
 `facts_distilled`, `facts_deduped` (all `int`, default `0`), plus
-`compress_reason_counts: dict[str, int]` -- what `Orchestrator.tick()`
+`compress_reason_counts: dict[str, int]`; what `Orchestrator.tick()`
 changed on that call.
 
 ## ProvenanceEntry / PackedMemory

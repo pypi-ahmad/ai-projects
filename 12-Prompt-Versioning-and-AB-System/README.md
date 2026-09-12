@@ -16,9 +16,9 @@ events (success, latency, thumbs, custom metrics) per resolved request.
   `pytest`, `ruff`, `ty`, `httpx>=0.28.1` (`fastapi.testclient` needs it).
   Full transitive pin list: `requirements.txt` / `uv.lock`.
 - [`uv`](https://docs.astral.sh/uv/) for development (`uv sync`, `uv run`).
-  Not required to just *run* the app — `run.cmd` uses plain `venv` + `pip`.
+  Not required to just *run* the app; `run.cmd` uses plain `venv` + `pip`.
 - Windows: developed and tested on Windows 11 (native, no WSL2, no
-  Docker — none of the tooling here needs either). `run.cmd` is a Windows
+  Docker; none of the tooling here needs either). `run.cmd` is a Windows
   batch file; the underlying Python code is not Windows-specific, but
   nothing here has been run on Linux/macOS.
 
@@ -43,10 +43,10 @@ uv run streamlit run src/promptreg/ui/app.py
 
 The API binds `127.0.0.1:8000` (override with `PROMPTREG_API_PORT`); the
 UI listens on the port set in `.streamlit/config.toml` (currently `7016`).
-Neither is bound to `0.0.0.0` — both are localhost-only as shipped.
+Neither is bound to `0.0.0.0`; both are localhost-only as shipped.
 
 The Streamlit UI imports `Registry`/`ExperimentStore`/`OutcomeStore`
-directly (see `src/promptreg/ui/app.py`) — it does not call the HTTP API,
+directly (see `src/promptreg/ui/app.py`); it does not call the HTTP API,
 and needs no admin token.
 
 If no `PROMPTREG_ADMIN_TOKEN` is set, the API generates one with
@@ -93,7 +93,7 @@ uv run python scripts/seed_demo.py
 Publishes `greet` v1/v2 (`config={"model": "stub", "provider": "stub"}`),
 starts a 50/50 experiment named `greet-tone-test`, and resolves + tracks
 outcomes for 20 fake users (`scripts/seed_demo.py`). Meant to run once
-against an empty `data/` directory — see the script's docstring for why a
+against an empty `data/` directory; see the script's docstring for why a
 second run against the same directory will fail partway through.
 
 The CLI also works standalone, no server needed:
@@ -105,13 +105,13 @@ uv run python -m promptreg.outcomes summary --experiment 1
 
 `promptreg.registry`'s CLI has only the `resolve` subcommand;
 `promptreg.outcomes`'s CLI has only `summary`. There is no CLI subcommand
-for publish, pointer, rollback, or experiment management — those go
+for publish, pointer, rollback, or experiment management; those go
 through the HTTP API, the Streamlit UI, or the Python classes directly.
 
 ## Configuration
 
 **Environment variables** (all optional; every default below is what the
-code falls back to when unset — verified by reading each `os.environ.get`
+code falls back to when unset; verified by reading each `os.environ.get`
 call, there is no `.env.example` in this repo):
 
 | Variable | Default | Read by |
@@ -119,18 +119,18 @@ call, there is no `.env.example` in this repo):
 | `PROMPTREG_DB_PATH` | `data/registry.db` | api, ui, both CLIs, seed script |
 | `PROMPTREG_PROMPTS_DIR` | `data/prompts` | api, ui, registry CLI, seed script |
 | `PROMPTREG_OUTCOMES_JSONL` | `data/outcomes.jsonl` | api, ui, both CLIs, seed script |
-| `PROMPTREG_ADMIN_TOKEN` | none — generated + printed at startup | api only |
+| `PROMPTREG_ADMIN_TOKEN` | none; generated + printed at startup | api only |
 | `PROMPTREG_API_PORT` | `8000` | api only |
 
 **Config files:**
 
-- `.streamlit/config.toml` — `[server] port` (`7016`) and `[theme] base`
+- `.streamlit/config.toml`; `[server] port` (`7016`) and `[theme] base`
   (`"dark"`) for the Streamlit UI. Not passed as CLI flags.
-- `pyproject.toml` — `[tool.ruff]`/`[tool.ruff.lint]` (lint rules, 100-char
+- `pyproject.toml`; `[tool.ruff]`/`[tool.ruff.lint]` (lint rules, 100-char
   lines, per-file ignores for `tests/`, `scripts/`, `**/__main__.py`) and
   `[tool.ty.environment]` (type-checker Python version).
 
-No secrets management beyond the admin token above — nothing else in this
+No secrets management beyond the admin token above; nothing else in this
 codebase reads a credential or API key.
 
 ## Repo map
@@ -162,7 +162,7 @@ uv run ruff check .
 uv run ty check src/
 ```
 
-No CI is configured in this repo (no `.github/workflows` or equivalent) —
+No CI is configured in this repo (no `.github/workflows` or equivalent) ;
 these are run manually.
 
 ## Known limitations
@@ -181,7 +181,7 @@ These are visible directly in the code, not aspirational:
   shared cache or lock beyond what SQLite itself provides.
 - **No logging module.** Nothing in `src/` imports `logging`. Diagnostics
   are `print()` (CLI output, the admin-token line at API startup) and
-  whatever `uvicorn`/`streamlit` write to the console themselves — there
+  whatever `uvicorn`/`streamlit` write to the console themselves; there
   is no log file.
 - **Admin auth is a single header equality check.** `require_admin_token`
   in `src/promptreg/api/app.py` compares `X-Admin-Token` with `!=`; there
@@ -192,17 +192,17 @@ These are visible directly in the code, not aspirational:
 - **No CI, no LICENSE file, no `.env.example`, no commits yet.** This is a
   local, single-branch (`master`) git repository with no remote configured
   and no commit history at time of writing. `CONTRIBUTING.md` is
-  deliberately not included — there is no CI or branch policy in this
+  deliberately not included; there is no CI or branch policy in this
   repo to document one against.
 
 ## More detail
 
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — request/data flow, module
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md); request/data flow, module
 map, HTTP routes, state and lifetime. [docs/TECHNICAL.md](docs/TECHNICAL.md)
-— stack choices, invariants, error handling, persistence paths.
-[docs/DATA.md](docs/DATA.md) — field-level schema for every table.
-[docs/SPLIT.md](docs/SPLIT.md) — the sticky-assignment hash in detail.
-[docs/RUNBOOK.md](docs/RUNBOOK.md) — start/stop, rollback steps,
+; stack choices, invariants, error handling, persistence paths.
+[docs/DATA.md](docs/DATA.md); field-level schema for every table.
+[docs/SPLIT.md](docs/SPLIT.md); the sticky-assignment hash in detail.
+[docs/RUNBOOK.md](docs/RUNBOOK.md); start/stop, rollback steps,
 troubleshooting by error string.
 
 <p align="center">Made with ❤️ by Ahmad Mujtaba</p>

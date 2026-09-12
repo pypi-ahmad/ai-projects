@@ -2,14 +2,14 @@
 
 A Python library and local HTTP service that filters text going into and coming out of an LLM
 call: PII redaction, prompt-injection pattern matching, and an optional local-model classifier.
-It does not call an LLM provider itself — callers wrap their own provider call with it.
+It does not call an LLM provider itself; callers wrap their own provider call with it.
 
 ## Requirements
 
 Taken from `pyproject.toml` and `.python-version`:
 
 - Python `>=3.13` (`.python-version` pins the dev environment to `3.13`)
-- [`uv`](https://docs.astral.sh/uv/) as the package/environment manager — the repo has no
+- [`uv`](https://docs.astral.sh/uv/) as the package/environment manager; the repo has no
   `requirements.txt`-based `pip install` workflow as its source of truth (see below)
 - Windows: `run.cmd` is a `.cmd` batch file, so the one-command setup is Windows-only. The
   underlying `uv`/`pytest`/`uvicorn`/`streamlit` commands themselves are cross-platform; nothing
@@ -62,8 +62,8 @@ Confirmed by `grep`ing `os.getenv` in `src/guardrails/`:
 | `GUARDRAILS_LOG_FINDINGS` | `api.py` | `1`/`true`/`yes` (case-insensitive) enables the JSONL findings log; anything else (including unset) leaves it off |
 
 `.env.example` (present in the repo, not readable by this documentation pass due to local
-permission settings on `.env*` files — content not independently re-verified here) also lists
-`GUARDRAILS_FAIL_MODE`. **That variable is not read by any code in `src/guardrails/`** — `grep`
+permission settings on `.env*` files; content not independently re-verified here) also lists
+`GUARDRAILS_FAIL_MODE`. **That variable is not read by any code in `src/guardrails/`**; `grep`
 for it finds no `os.getenv` call. `Guard`'s `fail_mode` is a constructor argument only
 (`guardrails/pipeline.py`, default `"closed"`). This looks like a leftover from an earlier
 version of the pipeline; treat `.env.example`'s claim about it as unverified/stale.
@@ -78,12 +78,12 @@ version of the pipeline; treat `.env.example`'s claim about it as unverified/sta
 | `config/blocklists/*.txt` | `rules.py` (`_load_blocklists`) | phrase/regex lists: `injection.txt`, `role_play.txt` (input), `leak_phrases.txt`, `denied_topics.txt` (output, empty by default) |
 | `.streamlit/config.toml` | Streamlit itself | `server.port = 7014`, `theme.base = "dark"` |
 
-None of these three `load_*_config` functions read their file automatically — a caller must
+None of these three `load_*_config` functions read their file automatically; a caller must
 call them and pass the result into `detect()`/the relevant `Detector` explicitly (see
 `docs/PII.md`, `docs/DETECTORS.md`). `src/guardrails/api.py` and `src/guardrails/ui.py` both
 construct detectors with **no** config argument, so they run on the in-code defaults
 (`DEFAULT_PII_CONFIG`, `DEFAULT_RULES_CONFIG`, `DEFAULT_CLASSIFIER_CONFIG`), not on whatever is
-in the YAML files, unless something explicitly loads and passes it — as of this reading, neither
+in the YAML files, unless something explicitly loads and passes it; as of this reading, neither
 `api.py` nor `ui.py` does.
 
 ## Repo map
@@ -121,27 +121,27 @@ Visible directly in code/comments:
 
 - `src/guardrails/policies.py`'s own docstring: "Stub for now... Wiring an actual `Policy` into
   `GuardrailsPipeline` ... is future-phase work." The `strict`/`observe` policy names exist as a
-  `Literal` type but are not read by `pii.py`, `rules.py`, or `providers.py` to change behavior —
+  `Literal` type but are not read by `pii.py`, `rules.py`, or `providers.py` to change behavior ;
   each module's severity/threshold comes from its own YAML config, independent of the active
   `Policy` value. (The docstring also refers to a `GuardrailsPipeline` class that does not exist
-  in the current `pipeline.py` — `Guard`/`Pipeline` are the current names.)
-- `src/guardrails/detectors.py` is only imported by `tests/test_detectors.py` — it is not
+  in the current `pipeline.py`; `Guard`/`Pipeline` are the current names.)
+- `src/guardrails/detectors.py` is only imported by `tests/test_detectors.py`; it is not
   imported by `api.py`, `ui.py`, `pipeline.py`, or `__init__.py`, and is not part of the
   package's public API (`__all__` in `guardrails/__init__.py`). It exists and is tested, but the
   running application does not use it.
 - Detection is regex/heuristic/small-local-model based throughout (`pii.py`, `rules.py`,
-  `providers.py`). Expect false positives and false negatives — see `docs/PII.md`'s
+  `providers.py`). Expect false positives and false negatives; see `docs/PII.md`'s
   "Known false-positive risks" and `docs/THREAT_NOTES.md`. **This is not a compliance
   certification** (GDPR, HIPAA, PCI-DSS, or otherwise); it is a best-effort filtering layer.
 - The FastAPI app has no authentication and is documented (in its own docstring) as
   `127.0.0.1`-only; it is not hardened for exposure beyond localhost.
-- `.streamlit/config.toml` sets `server.port` and `theme.base` only — it does not set
+- `.streamlit/config.toml` sets `server.port` and `theme.base` only; it does not set
   `server.address`. Unlike the FastAPI app, nothing in this repo restricts the Streamlit UI to
   localhost. Observed directly while verifying this repo: running the UI without an explicit
   address printed both a "Network URL" and an "External URL" with real, non-localhost
   interface addresses, meaning by default it listens beyond `127.0.0.1`. The UI has no
   authentication either.
-- Not a git repository as checked out (no `.git` directory found) — there is no branch history,
+- Not a git repository as checked out (no `.git` directory found); there is no branch history,
   commit log, or CI to cross-reference for this documentation pass.
 
 <p align="center">Made with ❤️ by Ahmad Mujtaba</p>

@@ -33,7 +33,7 @@ free function, not a method on any store class (`src/memory/recall.py`).
 |---|---|---|
 | `WorkingItem`, `CompressJob` | `src/memory/working.py` | JSON list, `data/memory/working.json` (only on explicit `.snapshot()`) |
 | `Episode`, `EvictionPolicy` | `src/memory/episodic.py` | SQLite table `episodes` + FTS5 table `episodes_fts`, `data/memory/memory.db` |
-| `Fact`, `FactMatch` | `src/memory/semantic.py` | Qdrant collection `facts` (embedded, `data/memory/qdrant/`); the full `Fact` is the point payload -- no separate metadata table |
+| `Fact`, `FactMatch` | `src/memory/semantic.py` | Qdrant collection `facts` (embedded, `data/memory/qdrant/`); the full `Fact` is the point payload; no separate metadata table |
 | `CompressResult`, `DistillResult` | `src/memory/compress.py` | not persisted; returned in-process |
 | `MemoryConfig`, `MemoryReport` | `src/memory/orchestrator.py` | `MemoryConfig` loads from `config/memory.yaml`; `MemoryReport` is a return value, not persisted |
 | `ProvenanceEntry`, `PackedMemory` | `src/memory/recall.py` | not persisted; returned in-process |

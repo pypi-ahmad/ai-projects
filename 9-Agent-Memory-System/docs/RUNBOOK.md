@@ -13,7 +13,7 @@ in `.streamlit/config.toml`).
 Prerequisite: `ollama serve` running locally with at least
 `qwen3-embedding:0.6b` and `qwen3.5:0.8b` pulled (`config.py`'s
 `ALLOWED_OLLAMA_MODELS` lists all models the code is written to expect;
-only these two are actually called by any code path -- see README
+only these two are actually called by any code path; see README
 "Configuration").
 
 ## Stop
@@ -35,20 +35,20 @@ These are quoted or closely paraphrased from error text actually produced
 by this code:
 
 - **`sqlite3.ProgrammingError: SQLite objects created in a thread can
-  only be used in that same thread ...`** -- would indicate
+  only be used in that same thread ...`**; would indicate
   `EpisodicMemory`'s connection is being used from a different thread
   than the one that created it. The current code opens it with
   `check_same_thread=False` specifically to prevent this
   (`episodic.py`); seeing this error again means something is
   constructing a `sqlite3.Connection` a different way.
-- **`sqlite3.OperationalError: fts5: syntax error near "..."`** -- FTS5's
+- **`sqlite3.OperationalError: fts5: syntax error near "..."`**; FTS5's
   query syntax treats punctuation as operators. `EpisodicMemory.search_keyword`
   sanitizes its input to bare word tokens before calling FTS5
   (`_to_fts_query`, `episodic.py`); this error recurring means something
   is querying the `episodes_fts` table directly instead of going through
   `search_keyword`.
 - **`RebuildRequiredError: index_meta.json has embed_model=... , config
-  expects ...`** (`semantic.py`) -- `config.EMBED_MODEL` was changed
+  expects ...`** (`semantic.py`). `config.EMBED_MODEL` was changed
   without rebuilding the semantic index. There is no automatic fix: delete
   `data/memory/qdrant/` and `data/memory/index_meta.json`, then re-run
   whatever code calls `SemanticMemory.upsert_fact()` for every fact that
@@ -63,7 +63,7 @@ by this code:
   docstring states the store runs embedded, in-process, with no server;
   the design implies one process can hold `data/memory/qdrant/` open at
   a time. This project was not observed to produce a specific error
-  string for this case during this documentation pass -- treat it as
+  string for this case during this documentation pass; treat it as
   unverified, and avoid running the Streamlit app and a second script
   (e.g. `scripts/seed_demo.py`) against the same `data/memory/` at once.
 

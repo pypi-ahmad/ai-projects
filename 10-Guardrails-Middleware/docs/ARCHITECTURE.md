@@ -7,7 +7,7 @@ this file only describes present-day structure.
 ## Entry points
 
 Two separate processes read the same library, each building its own `Guard` instance. They do
-not call each other — the Streamlit UI does not go through the HTTP API.
+not call each other; the Streamlit UI does not go through the HTTP API.
 
 ```mermaid
 flowchart TD
@@ -57,12 +57,12 @@ Notes on this diagram, all checked against source:
   `api.py`, there's no config switch for it.
 - `ui.py` builds a separate `Guard` per "Check" click, with the same input detectors plus
   `EmbeddingSimilarityDetector`. Its toggles flip `use_llm_classifier`/`embedding_lane.enabled`
-  on an in-memory copy of `DEFAULT_CLASSIFIER_CONFIG` (the Python constant in `providers.py`) —
+  on an in-memory copy of `DEFAULT_CLASSIFIER_CONFIG` (the Python constant in `providers.py`) ;
   like `api.py`, `ui.py` never reads `config/classifier.yaml` itself; see README's
   "Configuration" section. It uses `guard.check_input`/`check_output` directly, never
   `wrap_call`.
 - `Pipeline.run()` applies each detector's output to the working text before the next detector
-  runs (`apply_spans`, `models.py`) — order in the list matters. This is why `PiiDetector` is
+  runs (`apply_spans`, `models.py`); order in the list matters. This is why `PiiDetector` is
   first in both lists in both `api.py` and `ui.py`.
 - `LlmClassifierDetector`/`EmbeddingSimilarityDetector` only make an outbound HTTP call at all if
   their respective config keys (`use_llm_classifier`, `embedding_lane.enabled` in
@@ -85,7 +85,7 @@ Notes on this diagram, all checked against source:
 
 State: no database, no persistent process-level state beyond what's described above.
 `EmbeddingSimilarityDetector` caches its 10 reference-phrase embeddings in an instance attribute
-after the first call (`_reference_vectors`, `providers.py`) — in-memory only, per-instance, not
+after the first call (`_reference_vectors`, `providers.py`); in-memory only, per-instance, not
 shared across processes or written to disk.
 
 ## External systems

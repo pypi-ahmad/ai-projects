@@ -1,6 +1,6 @@
 # Data model
 
-All implemented — Pydantic models + SQLite (same db file for
+All implemented; Pydantic models + SQLite (same db file for
 `Prompt`/`Version`/`Pointer`/`Experiment`/`Assignment`/`Outcome`; `Outcome`
 additionally appends to a JSONL audit log).
 
@@ -16,7 +16,7 @@ A named slot. Owns a history of versions, nothing else.
 
 ## Version
 
-Immutable — `publish` only ever inserts, never updates. Version number is a
+Immutable; `publish` only ever inserts, never updates. Version number is a
 monotonic int per prompt (1, 2, 3, ...), not content-addressed: publishing
 identical content twice still creates a new row. Body lives on disk at
 `data/prompts/<name>/<version>.md` and is never overwritten; SQLite holds
@@ -38,7 +38,7 @@ its sha256 and is re-verified against the file on every `get`
 
 ## Pointer
 
-Single version per (prompt, env) — `prod` or `staging`. No weights, no
+Single version per (prompt, env); `prod` or `staging`. No weights, no
 splitting yet.
 
 | Field | Type | Notes |
@@ -48,12 +48,12 @@ splitting yet.
 | `version` | int, FK -> Version.version | |
 | `updated_at` | text (ISO 8601 UTC) | |
 
-## pointer_history *(internal — audit log, not on the public API)*
+## pointer_history *(internal; audit log, not on the public API)*
 
 Every `set_pointer`/`rollback` appends a row here; `rollback` reads it to
 find what the pointer was before its current value, then reassigns it.
 Not a public entity in its own right, but it's what makes rollback
-possible — see [RUNBOOK.md](RUNBOOK.md).
+possible; see [RUNBOOK.md](RUNBOOK.md).
 
 | Field | Type | Notes |
 |---|---|---|
@@ -78,7 +78,7 @@ arm names, and integer weights summing to exactly 100.
 | `status` | text, `CHECK(status IN ('draft','running','paused','stopped'))` | |
 | `arms` (`arms_json`) | JSON list of `{name, version, weight}` | `version` FK-checked against Version at creation |
 | `sticky_salt` | text | auto-generated (`secrets.token_hex(8)`) if not given |
-| `start_at`, `end_at` | text (ISO 8601 UTC), nullable | metadata only — not enforced by `resolve` |
+| `start_at`, `end_at` | text (ISO 8601 UTC), nullable | metadata only; not enforced by `resolve` |
 | `created_at` | text (ISO 8601 UTC) | |
 
 A partial unique index (`prompt_name` where `status='running'`) keeps at
@@ -87,7 +87,7 @@ most one running experiment per prompt.
 ## Assignment
 
 The sticky record of "this `user_key`, under this experiment, got this
-arm" — written once (`INSERT OR IGNORE`) on first resolve, read on every
+arm"; written once (`INSERT OR IGNORE`) on first resolve, read on every
 one after. See [SPLIT.md](SPLIT.md).
 
 | Field | Type | Notes |
@@ -101,7 +101,7 @@ one after. See [SPLIT.md](SPLIT.md).
 ## Outcome
 
 Written to SQLite (queryable, updatable) and appended to a JSONL file
-(`data/outcomes.jsonl`, immutable audit log — one line per `record`, one
+(`data/outcomes.jsonl`, immutable audit log; one line per `record`, one
 more per `track`). `request_id` identifies the row; `user_key` is hashed
 before either store ever sees it.
 
@@ -124,6 +124,6 @@ before either store ever sees it.
 `OutcomeStore.summary(experiment_id)` aggregates these into per-arm
 descriptive stats (not stored, computed on read): `count`, `ok`,
 `thumbs_up`, `thumbs_down`, `task_ok` (raw counts) plus `ok_rate`,
-`thumbs_net`, `avg_latency_ms`, `p50_latency_ms` (derived — plain
+`thumbs_net`, `avg_latency_ms`, `p50_latency_ms` (derived; plain
 arithmetic and `statistics.median`, no significance testing or Bayesian
 inference). Rendered as a table by the UI's Outcomes tab.

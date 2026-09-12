@@ -15,7 +15,7 @@ summarization.
 - Python >= 3.13 (`pyproject.toml`, `.python-version`)
 - [uv](https://docs.astral.sh/uv/) for dependency management and running commands
 - [Ollama](https://ollama.com) running locally (`ollama serve`), with the models listed under "Configuration" pulled
-- Windows: the only provided launcher (`run.cmd`) is a Windows batch script; there is no `.sh` equivalent in the repo. The Python code itself uses cross-platform stdlib/library calls (`pathlib`, `sqlite3`), so it may run elsewhere, but that is unverified -- nothing in this repo shows it having been run on another OS.
+- Windows: the only provided launcher (`run.cmd`) is a Windows batch script; there is no `.sh` equivalent in the repo. The Python code itself uses cross-platform stdlib/library calls (`pathlib`, `sqlite3`), so it may run elsewhere, but that is unverified; nothing in this repo shows it having been run on another OS.
 
 Runtime dependencies (`pyproject.toml`; exact versions pinned in `uv.lock` and `requirements.txt`):
 
@@ -66,7 +66,7 @@ Only `working.py` and `semantic.py` under `src/memory/` define a
 `scripts/seed_demo.py` seeds session `"demo"` with a 12-turn scripted
 conversation, forces working-memory overflow, distills facts, and runs
 `recall()`. `--recall-only` skips seeding and recalls against whatever is
-already on disk -- this is how persistence across a process restart was
+already on disk; this is how persistence across a process restart was
 checked (both commands above were run as two separate processes; the
 second found the same planted fact the first wrote).
 
@@ -75,9 +75,9 @@ second found the same planted fact the first wrote).
 There is no `.env` or `.env.example` file in this repository.
 Configuration is Python constants plus one YAML file:
 
-- `src/memory/config.py` -- paths under `data/memory/`, the allowed Ollama
+- `src/memory/config.py`; paths under `data/memory/`, the allowed Ollama
   model names, and non-Ollama provider settings.
-- `config/memory.yaml` -- loaded by
+- `config/memory.yaml`; loaded by
   `src/memory/orchestrator.py:load_memory_config()`. A missing file, or
   missing keys within it, fall back to the defaults on the `MemoryConfig`
   class in `orchestrator.py`.
@@ -85,7 +85,7 @@ Configuration is Python constants plus one YAML file:
 Environment variables actually read by the code
 (`src/memory/config.py:available_providers()`): `AGNESAI_API_KEY`,
 `OPENAI_API_KEY`, `GOOGLE_API_KEY`. These are only checked for presence
-(booleans) -- nothing in the current code calls Agnes AI, an
+(booleans); nothing in the current code calls Agnes AI, an
 OpenAI-compatible endpoint, or Gemini. `src/memory/providers.py`, the
 module that would do that, is a docstring-only stub with no
 implementation.

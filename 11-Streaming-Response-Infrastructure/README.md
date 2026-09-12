@@ -12,7 +12,7 @@ benchmark.
 
 - Python 3.13 (`.python-version` pins `3.13`; `pyproject.toml` requires
   `>=3.13`).
-- [uv](https://docs.astral.sh/uv/) — every documented command in this repo
+- [uv](https://docs.astral.sh/uv/); every documented command in this repo
   is a `uv` command. `pyproject.toml`'s `[build-system]` requires
   `uv_build>=0.12.13,<0.13.0`. No pip/venv-based setup is documented or
   verified in this repo, even though a pinned `requirements.txt` is
@@ -20,7 +20,7 @@ benchmark.
 - Native Windows: `run.cmd` is a Windows batch file and is the only launch
   script in the repo. The underlying commands it runs (`uv sync`, `uv run
   uvicorn ...`) are themselves OS-agnostic, but there is no `.sh`
-  equivalent — running this on Linux/macOS means invoking those `uv`
+  equivalent; running this on Linux/macOS means invoking those `uv`
   commands directly, unverified here.
 - Optional, only if you use the Ollama provider: a running Ollama server.
   The code's default target is `http://127.0.0.1:11434`
@@ -42,7 +42,7 @@ uv run streamlit run src/stream/ui.py
 ```
 
 (the Streamlit consumer; port and theme come from `.streamlit/config.toml`,
-verified to default to `7015`/dark with no CLI flags — see docs/RUNBOOK.md)
+verified to default to `7015`/dark with no CLI flags; see docs/RUNBOOK.md)
 and the static demo at `http://127.0.0.1:8000/client.html`, served by the
 FastAPI app itself once it's running.
 
@@ -71,11 +71,11 @@ read directly from process environment variables, referenced by name in
 
 The `ollama` provider needs no key (local, default
 `http://127.0.0.1:11434`). A variable's presence is checked live at
-`POST /v1/stream/start` request time (`os.environ`, `src/stream/api.py`) —
+`POST /v1/stream/start` request time (`os.environ`, `src/stream/api.py`) ;
 it is not read from a `.env` file or any config file, since none exists.
 
 `.streamlit/config.toml` sets Streamlit's `server.port` (`7015`) and
-`theme.base` (`dark`) — the only non-code configuration file in the repo.
+`theme.base` (`dark`); the only non-code configuration file in the repo.
 
 ## Repo map
 
@@ -107,7 +107,7 @@ uv run pytest -q
 39 tests across 8 files in `tests/` (`test_api.py`, `test_backpressure.py`,
 `test_bench.py`, `test_fake_adapter.py`, `test_provider_adapters.py`,
 `test_session.py`, `test_sse.py`, `test_start_and_metrics.py`). All run
-offline — provider adapter tests use `httpx2.MockTransport`, none require a
+offline; provider adapter tests use `httpx2.MockTransport`, none require a
 live Ollama instance, a GPU, or any real API key. `pytest-asyncio` is
 configured in `pyproject.toml` (`asyncio_mode = "auto"`); no other pytest
 plugins or markers are configured.
@@ -137,7 +137,7 @@ Stated directly in code and comments, not inferred:
   (`400 API_KEY_INVALID`), so streaming was never confirmed end to end.
 - **Token counts are not LLM token counts.** `tokens` in `logs/streams.jsonl`
   and `GET /v1/metrics` is a count of `token` SSE events emitted, i.e.
-  provider chunk count — documented as such in `docs/METRICS.md` and in
+  provider chunk count; documented as such in `docs/METRICS.md` and in
   `StreamSession`'s own code.
 - **`requirements.txt` is a generated artifact, not the source of truth.**
   It's produced by `uv export --no-hashes --no-dev`; dependency changes

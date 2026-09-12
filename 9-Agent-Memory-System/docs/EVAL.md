@@ -1,6 +1,6 @@
 # Evaluation
 
-Both are covered now that every store is real -- no longer stubs.
+Both are covered now that every store is real; no longer stubs.
 
 ## 1. Planted-fact recall
 
@@ -18,7 +18,7 @@ process restart via `--recall-only`).
 
 Feed items into working memory past its configured token budget. After
 every insert, measure the buffer's token count. Pass: it never exceeds the
-cap -- overflow always leaves via `compress.py`, it never silently
+cap; overflow always leaves via `compress.py`, it never silently
 accumulates past the limit.
 
 Covered by: `tests/test_working.py::test_cap_honored` (working memory's
