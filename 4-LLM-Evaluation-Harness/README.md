@@ -1,16 +1,16 @@
 # LLM Evaluation Harness
 
-Golden-dataset evaluation harness for LLMs: run candidate models against a fixed set of
-cases, score each answer with deterministic metrics and an LLM-as-judge, and fail the gate
-when quality regresses against a stored baseline.
+This harness runs candidate models against a fixed golden dataset, scores each answer with
+deterministic metrics and an LLM judge, and fails the gate when quality regresses from a stored
+baseline.
 
-## What is measured
+## What it measures
 
-- **Deterministic metrics** — exact match, contains-any/all, forbidden-any, regex match,
+- **Deterministic metrics:** exact match, contains-any/all, forbidden-any, regex match,
   JSON validity, latency, response length. See [docs/METRICS.md](docs/METRICS.md).
-- **Judge rubric scores** — an LLM judge scores each answer against a rubric, returned as a
+- **Judge rubric scores:** an LLM judge scores each answer against a rubric, returned as a
   validated Pydantic schema (never trusted as raw text).
-- **Regression gate** — the current run's scores are compared against a stored baseline; the
+- **Regression gate:** the current run's scores are compared against a stored baseline; the
   gate exits non-zero if quality drops beyond a threshold. See [docs/GATES.md](docs/GATES.md).
 
 ## Running locally
@@ -47,14 +47,14 @@ requirement.
 
 Candidate and judge models are both selectable, independently, from:
 
-1. **Ollama** (local) — auto-detected installed models; `granite4.1:3b` is the
+1. **Ollama** (local): auto-detected installed models. `granite4.1:3b` is the
    recommended candidate and the Streamlit UI's default dropdown pick, but every CLI
    requires `--model` explicitly.
-2. **Agnes AI** — `agnes-2.5-flash` via an OpenAI-compatible endpoint (`AGNES_API_KEY`).
-3. **OpenAI-compatible** — `gpt-5.6-luna` / `gpt-5.6-terra` (`OPENAI_API_KEY`, `OPENAI_BASE_URL`).
-4. **Gemini** — `gemini-3.5-flash-lite` / `gemini-3.7-flash` (`GOOGLE_API_KEY`).
+2. **Agnes AI:** `agnes-2.5-flash` via an OpenAI-compatible endpoint (`AGNES_API_KEY`).
+3. **OpenAI-compatible:** `gpt-5.6-luna` / `gpt-5.6-terra` (`OPENAI_API_KEY`, `OPENAI_BASE_URL`).
+4. **Gemini:** `gemini-3.5-flash-lite` / `gemini-3.7-flash` (`GOOGLE_API_KEY`).
 
-The judge is never silently the same model+prompt as the candidate when avoidable — see
+The judge is never silently the same model+prompt as the candidate when avoidable. See
 [docs/RUNBOOK.md](docs/RUNBOOK.md).
 
 ## How the gate fails

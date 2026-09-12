@@ -26,7 +26,6 @@ flowchart LR
 | `src/eval` | Orchestrates the pipeline end to end, produces the report |
 | `src/ui` | Streamlit frontend |
 
-`src/llm_eval_harness/__init__.py` also exists but is not a pipeline component: it's an
-empty, unused package root required only because the `uv_build` backend
-(`pyproject.toml`) maps the project name `llm-eval-harness` to it. All real code lives
-in the flat `src/<module>` packages listed above.
+`src/llm_eval_harness/__init__.py` is not a pipeline component. It is an empty package root
+required because the `uv_build` backend (`pyproject.toml`) maps the project name
+`llm-eval-harness` to it. All real code lives in the flat `src/<module>` packages listed above.

@@ -10,5 +10,5 @@
 | Tokenize docs in another language (translate) | gemma:4b only if source is not English |
 | Embed / OCR | skip unless a later phase adds retrieval |
 
-Default path needs no model loaded — tiktoken + packing rules only.
+Default path needs no model loaded; tiktoken + packing rules only.
 Do not load two 3B+ models simultaneously (8 GB ceiling).

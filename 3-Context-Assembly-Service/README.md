@@ -1,6 +1,6 @@
 # Context Assembly Service
 
-Receives a **token budget** and candidate blocks from three families — **memory**, **docs**, **tools** — and returns a packed context that fits, plus a decision report explaining every kept, compressed, or dropped block.
+Receives a **token budget** and candidate blocks from three families; **memory**, **docs**, **tools**; and returns a packed context that fits, plus a decision report explaining every kept, compressed, or dropped block.
 
 Context engineering is the point. Every decision is visible.
 
@@ -18,10 +18,10 @@ run.cmd
 
 The browser opens at `http://localhost:8501`.
 
-1. Click **Load sample** — loads `tests/fixtures/sample_request.json` (400-token window, oversized docs).
-2. Click **▶ Assemble** — packs blocks, drops what doesn't fit.
+1. Click **Load sample**; loads `tests/fixtures/sample_request.json` (400-token window, oversized docs).
+2. Click **▶ Assemble**; packs blocks, drops what doesn't fit.
 3. Read the results: token bars per family, packed messages, dropped-block table.
-4. Click **⬇ Export pack.json** — download the full payload for your API call.
+4. Click **⬇ Export pack.json**; download the full payload for your API call.
 
 ---
 
@@ -100,7 +100,7 @@ Runs 6 built-in cases; `overflow_count` must be 0.
 
 ---
 
-## Providers (optional — compression only)
+## Providers (optional; compression only)
 
 | Provider | Env var(s) | Model |
 |----------|-----------|-------|
@@ -118,7 +118,7 @@ packing works fully offline with no keys set.
 ## Requirements
 
 - Python 3.11+
-- `uv` — `winget install astral-sh.uv`
+- `uv`; `winget install astral-sh.uv`
 - No GPU needed for packing; RTX 4060 8 GB used only for optional Ollama compression
 
 ---
@@ -128,10 +128,10 @@ packing works fully offline with no keys set.
 - `src/eval/__init__.py` and `src/providers/__init__.py` are empty stubs (one comment each,
   no code). Eval logic actually lives in `tests/eval/run_eval.py`; provider logic lives in the
   root-level `providers.py`.
-- No `.env.example` file — see Providers section above.
+- No `.env.example` file; see Providers section above.
 - Compression quality (fact preservation, coherence) is not evaluated beyond the
   `TRIMMED` / `COMPRESS_FAILED` length safeguards in `src/compress/compressor.py`.
-- No retrieval or RAG index — the caller must supply already-selected, already-ranked blocks.
+- No retrieval or RAG index; the caller must supply already-selected, already-ranked blocks.
 - `docs/CONTRIBUTING.md` is omitted: this directory is not a git repository and has no CI
   configuration (no `.github/`), so there are no branch or test-gate conventions to document.
 

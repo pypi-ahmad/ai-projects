@@ -10,19 +10,19 @@ Copy `.env.example` to `.env` and fill in the keys for whichever providers you u
 | `OPENAI_API_KEY`, `OPENAI_BASE_URL` | OpenAI-compatible |
 | `GOOGLE_API_KEY` | Gemini |
 
-Ollama needs no key — it's detected locally.
+Ollama needs no key. It is detected locally.
 
 ## Ollama (local models)
 
 Requires Ollama installed and running natively on Windows (no WSL2, no Docker). Only
 these models are used by this repo's jobs:
 
-- `granite4.1:3b` — recommended candidate, and recommended local judge when the
+- `granite4.1:3b`: recommended candidate, and recommended local judge when the
   candidate used a different model. It's the Streamlit UI's default dropdown selection
   for Ollama, but every CLI (`src.runners.candidate`, `src.judge`) requires `--model`
   explicitly every time -- nothing auto-selects it.
-- `qwen3.5:2b` — cheap candidate alternative.
-- `qwen3.5:0.8b` — tiny parse/repair of judge JSON output (see docs/METRICS.md).
+- `qwen3.5:2b`: cheap candidate alternative.
+- `qwen3.5:0.8b`: tiny parse/repair of judge JSON output (see docs/METRICS.md).
 
 After all cases in a run finish, `src.runners.candidate` and `src.judge` each explicitly
 unload their Ollama model (`keep_alive=0`) rather than waiting on Ollama's own idle
@@ -46,8 +46,8 @@ If no local GPU/Ollama is available (e.g. a CI runner):
 - Skip the local judge entirely, or
 - Use a cloud judge (Agnes AI / OpenAI-compatible / Gemini) instead.
 
-The candidate model must also come from a cloud provider in this case — Ollama requires
-a local GPU-capable machine.
+In this case, the candidate model must also come from a cloud provider. Ollama requires a
+local GPU-capable machine.
 
 ## Judge model selection
 

@@ -1,6 +1,6 @@
 # Dataset
 
-Golden cases live under `datasets/golden/*.jsonl` — one JSON object per line. Loaded and
+Golden cases live under `datasets/golden/*.jsonl`, with one JSON object per line. They are loaded and
 validated by `src/dataset` (`Case` and friends in `src/dataset/models.py`, all with
 `extra="forbid"` -- an unknown field in a case is a validation error, not a silent no-op).
 

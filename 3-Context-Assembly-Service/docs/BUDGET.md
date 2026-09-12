@@ -39,7 +39,7 @@ Cap fractions must sum to 1.0 (enforced at load time).
 |------|-------|--------|
 | output_reserve | 20% | 1 638 |
 | system_reserve | 8% | 655 |
-| user_message | counted | ~10–50 |
+| user_message | counted | ~10 to 50 |
 | usable | ~72% | ~5 900 |
 | memory cap | 30% of usable | ~1 770 |
 | docs cap | 45% of usable | ~2 655 |

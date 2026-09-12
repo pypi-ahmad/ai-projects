@@ -1,6 +1,6 @@
 # Architecture
 
-## What this service is — and is not
+## What this service is; and is not
 
 The Context Assembly Service is a **token budgeter and packer**. It receives a list of candidate
 blocks that the *caller* has already selected and ranked, fits them into a token window, and

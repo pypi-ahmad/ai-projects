@@ -1,8 +1,7 @@
 # Eval (meta)
 
-This repo's job is to evaluate *other* models (candidates), not itself — but the harness
-code itself still needs a self-test so a broken metric/judge/gate doesn't silently pass
-everything.
+This repository evaluates *other* models (candidates). Its metric, judge, and gate code still
+need self-tests so a failure cannot silently pass everything.
 
 This file's original intent was a dedicated set of harness self-tests: fixed inputs with
 a known correct metric/gate output. In practice that role is filled by the regular pytest

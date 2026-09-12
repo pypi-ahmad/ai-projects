@@ -2,7 +2,7 @@
 
 ## Eval runner
 
-`tests/eval/run_eval.py` — reads `tests/eval/cases.jsonl`, runs `allocate` + `pack` for each
+`tests/eval/run_eval.py`; reads `tests/eval/cases.jsonl`, runs `allocate` + `pack` for each
 case, checks expected invariants, and prints aggregate metrics.
 
 ```cmd
@@ -16,8 +16,8 @@ uv run python tests/eval/run_eval.py --json   # machine-readable output
 |--------|-----------|--------|
 | `overflow_count` | Cases where `token_total > context_window` | **0** (hard requirement) |
 | `drop_rate` | `total_dropped / total_input_blocks` across all cases | < 0.25 for well-tuned priorities |
-| `compress_rate` | `total_compress_jobs / total_input_blocks` | — (informational) |
-| `avg_leftover` | Average `usable − token_budget_used` across cases | — (informational) |
+| `compress_rate` | `total_compress_jobs / total_input_blocks` |; (informational) |
+| `avg_leftover` | Average `usable − token_budget_used` across cases |; (informational) |
 
 `overflow_count` is the primary hard gate, but the runner exits non-zero if either
 `overflow_count > 0` **or** any case fails its `expect` assertions (`failed > 0`).
@@ -75,12 +75,12 @@ A high-priority block (`priority ≥ 80`) should never be dropped while a lower-
 (`priority < 50`) is kept in the same family. The allocator's priority-descending sort in Passes
 A and B guarantees this within a family. Cross-family ordering is governed by policy caps, not
 priority, so a `priority=90` docs block can be excluded if the docs cap is exhausted and the
-borrow pool is consumed by higher-priority blocks in other families — this is expected behavior,
+borrow pool is consumed by higher-priority blocks in other families; this is expected behavior,
 not a bug.
 
 ## What is not evaluated here
 
-- Compression quality (summary accuracy, fact preservation) — requires human or model-based
+- Compression quality (summary accuracy, fact preservation); requires human or model-based
   evaluation outside this codebase.
-- Retrieval quality — this service does not retrieve docs; the caller supplies candidate blocks.
+- Retrieval quality; this service does not retrieve docs; the caller supplies candidate blocks.
 - Latency under load.
