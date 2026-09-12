@@ -76,6 +76,7 @@
 !**/data/cache/.gitkeep
 
 # Private inputs and runtime/audit dumps can contain documents and prompts
+SECRET_SCAN.md
 **/data/inbox/**
 !**/data/inbox/.gitkeep
 **/data/audit/
