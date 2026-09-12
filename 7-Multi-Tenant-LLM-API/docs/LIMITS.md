@@ -3,7 +3,7 @@
 Implemented in `src/quota/limiter.py::check_quota()`, called before an
 upstream request would be made, in this order:
 
-1. tenant active (else `TenantSuspendedError`, 403 — from `src/auth/errors.py`, reused as-is)
+1. tenant active (else `TenantSuspendedError`, 403; from `src/auth/errors.py`, reused as-is)
 2. model allowed for tenant (else `MODEL_NOT_ALLOWED`, 403)
 3. provider allowed for tenant (else `PROVIDER_NOT_ALLOWED`, 403)
 4. rpm (else `RATE_RPM`, 429 + `Retry-After`)
@@ -15,14 +15,14 @@ All limits live in `plan_limits` (one row per tenant, Phase 2 schema).
 
 ## Rate limit (rpm, rpd)
 
-- **Unit:** requests per tenant, counted per `tenant_id` — shared across
+- **Unit:** requests per tenant, counted per `tenant_id`; shared across
   all of a tenant's keys, not one counter per key.
 - **rpm:** sliding 60-second window. A request is counted once it
   completes and `record_usage()` writes its `usage_events` row (see
-  "Accounting order" below) — a request that itself gets rejected by
+  "Accounting order" below); a request that itself gets rejected by
   quota never reaches upstream, so it never adds to the count.
 - **rpd:** fixed window, UTC calendar day (00:00:00 UTC to next
-  00:00:00 UTC) — not a rolling 24h window.
+  00:00:00 UTC); not a rolling 24h window.
 - **On exceed:** `429`, no upstream call made, `Retry-After` in seconds:
   time until the oldest in-window request ages out (rpm) or time until
   next UTC midnight (rpd).
@@ -32,7 +32,7 @@ All limits live in `plan_limits` (one row per tenant, Phase 2 schema).
 - **Unit:** total tokens (`in_tokens + out_tokens`) per tenant, summed
   across all providers/models.
 - **Reset period:** one calendar month, starting on `plan_limits.budget_reset_day`
-  (day-of-month, clamped to the last valid day for short months — e.g.
+  (day-of-month, clamped to the last valid day for short months; e.g.
   reset day 31 becomes Feb 28/29). Not a rolling 30 days.
 - **On exceed:** `429` before the upstream call, `Retry-After` = seconds
   until the next period start. A request is never sent to a paid provider
@@ -42,7 +42,7 @@ All limits live in `plan_limits` (one row per tenant, Phase 2 schema).
 
 Only checked if the client's request includes a `max_tokens` value; not
 enforced when absent (nothing to compare against). Rejects with
-`MAX_TOKENS_PER_REQUEST` (400 — not a rate/budget issue, a request-shape
+`MAX_TOKENS_PER_REQUEST` (400; not a rate/budget issue, a request-shape
 issue) if the client asked for more completion tokens than the tenant's
 plan allows per request.
 
@@ -51,7 +51,7 @@ plan allows per request.
 `POST /v1/chat` (`src/api/app.py::_estimate_tokens`) has no tokenizer:
 prompt tokens are approximated as `len(content) // 4` summed across
 messages. The completion side only adds the client's own `max_tokens` *if
-they sent one* — an unspecified `max_tokens` adds 0, not the plan's
+they sent one*; an unspecified `max_tokens` adds 0, not the plan's
 `max_tokens_per_req` ceiling. Assuming the worst case (the per-request cap)
 for every uncapped request would falsely reject a tenant with a modest
 budget who simply never bounds `max_tokens`; the "Accounting order" below
@@ -62,15 +62,15 @@ speculative estimate here.
 
 Quota is checked *before* the upstream call (`check_quota`); usage is
 recorded *after* it completes (`src/usage/service.py::record_usage`,
-always — success or failure). Two consequences:
+always; success or failure). Two consequences:
 
 - An over-budget tenant never reaches a paid provider (cost control).
 - **If the actual token count from a completed call pushes the tenant over
-  budget, that response is still returned in full — v1 does not truncate
+  budget, that response is still returned in full; v1 does not truncate
   mid-response (there's no streaming in v1 to truncate mid-stream anyway).
   `record_usage` writes the real total regardless; the *next* call's
   `check_quota` reads that updated sum and is the one that gets rejected.**
-  No separate "over budget" flag or cap exists — this falls out of the
+  No separate "over budget" flag or cap exists; this falls out of the
   check-before / record-after order for free.
 
 ## Implementation note (why no in-memory counters)
@@ -93,7 +93,7 @@ says otherwise.
 **This project assumes exactly one `uvicorn` process** (`run.cmd` starts a
 single worker; no `--workers N`, no multiple replicas behind a load
 balancer). `check_quota` (read) and `record_usage` (write) are two
-separate SQLite statements with no cross-request lock between them — two
+separate SQLite statements with no cross-request lock between them; two
 concurrent requests for the same tenant can both read "under the limit"
 before either one's usage is recorded, letting the tenant briefly exceed
 rpm/rpd/budget by a request or two. A single process's own thread pool

@@ -28,7 +28,7 @@ models:
     out_per_1k: <USD per 1 000 output tokens>
 ```
 
-All Ollama models have `in_per_1k: 0.0` and `out_per_1k: 0.0` — local inference has no API cost (electricity is not metered).
+All Ollama models have `in_per_1k: 0.0` and `out_per_1k: 0.0`. Local inference has no API cost; electricity is not metered.
 
 **If a model is absent from `prices.yaml`:** `estimate_cost()` returns `None`, the JSONL event records `cost: null` and `unpriced: true`. The daily aggregator tracks `unpriced_count` separately.
 
@@ -38,10 +38,10 @@ All Ollama models have `in_per_1k: 0.0` and `out_per_1k: 0.0` — local inferenc
 
 | Model | in_per_1k (USD) | out_per_1k (USD) | Note |
 |-------|----------------|-----------------|------|
-| `qwen3.5:0.8b` | 0.0 | 0.0 | Ollama — free |
-| `qwen3.5:2b` | 0.0 | 0.0 | Ollama — free |
-| `qwen3-vl:2b` | 0.0 | 0.0 | Ollama — free |
-| `granite4.1:3b` | 0.0 | 0.0 | Ollama — free |
+| `qwen3.5:0.8b` | 0.0 | 0.0 | Ollama; free |
+| `qwen3.5:2b` | 0.0 | 0.0 | Ollama; free |
+| `qwen3-vl:2b` | 0.0 | 0.0 | Ollama; free |
+| `granite4.1:3b` | 0.0 | 0.0 | Ollama; free |
 | `agnes-2.5-flash` | 0.0003 | 0.0006 | estimate |
 | `gpt-5.6-luna` | 0.0005 | 0.0015 | estimate |
 | `gpt-5.6-terra` | 0.0003 | 0.0009 | estimate |

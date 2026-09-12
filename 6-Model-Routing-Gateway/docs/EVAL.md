@@ -1,6 +1,6 @@
 # Routing Eval
 
-The routing eval is a **merge gate for routing logic** — no GPU, no API keys, no running models required. It tests that `route()` + `FeatureExtractor` produce the correct tier, model, and status for a fixed set of cases.
+The routing eval is a **merge gate for routing logic**. It needs no GPU, API keys, or running models. It tests whether `route()` and `FeatureExtractor` produce the expected tier, model, and status for a fixed set of cases.
 
 ---
 
@@ -25,7 +25,7 @@ Optional flags:
 
 1. Loads `config/features.yaml` and `config/tiers.yaml`.
 2. Reads cases from `tests/eval/routes.jsonl` (one JSON object per line).
-3. For each case: builds a `GatewayRequest`, runs `FeatureExtractor.extract()`, calls `route()` with `availability = lambda p, m: True` — all targets treated as available so availability is not under test.
+3. For each case: builds a `GatewayRequest`, runs `FeatureExtractor.extract()`, calls `route()` with `availability = lambda p, m: True`; all targets treated as available so availability is not under test.
 4. Checks assertions (`expected_tier`, `expected_not_tier`, `expected_model`, `expected_status`).
 5. Prints per-case `[PASS]` / `[FAIL]` with tier, model, complexity score, and label.
 6. Prints summary `N/N passed`.
@@ -34,7 +34,7 @@ Optional flags:
 
 ## Case format (`tests/eval/routes.jsonl`)
 
-One JSON object per line. All assertion fields are optional — include only those relevant to the case.
+One JSON object per line. All assertion fields are optional; include only those relevant to the case.
 
 ```jsonc
 {
@@ -84,14 +84,14 @@ One JSON object per line. All assertion fields are optional — include only tho
 2. Run `uv run python -m src.route.eval --fail-on-mismatch` to verify.
 3. If the case fails, check whether the routing or scoring logic needs fixing, or the case expectation is wrong.
 
-Use `expected_not_tier` over `expected_tier` when multiple tiers are acceptable — it is more robust to future tier additions.
+Use `expected_not_tier` over `expected_tier` when multiple tiers are acceptable; it is more robust to future tier additions.
 
 ---
 
 ## What this eval does not cover
 
-- Actual model output quality — requires human or model-based evaluation.
-- Provider availability — all targets are treated as available (`lambda p, m: True`).
-- Real latency — no provider calls are made.
-- Cost accuracy against invoices — rates in `config/prices.yaml` are estimates.
-- Token approximation quality — tiktoken is deterministic but not exact for all models.
+- Actual model output quality; requires human or model-based evaluation.
+- Provider availability; all targets are treated as available (`lambda p, m: True`).
+- Real latency; no provider calls are made.
+- Cost accuracy against invoices; rates in `config/prices.yaml` are estimates.
+- Token approximation quality; tiktoken is deterministic but not exact for all models.

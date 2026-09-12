@@ -8,7 +8,7 @@
 | ASGI server | `uvicorn[standard]` | Started by `run.cmd` and documented directly in `src/api/app.py`'s module docstring: route handlers are plain `def`, not `async def`, because everything they call (SQLAlchemy's sync `Session`, the sync provider SDKs) is blocking, and Starlette runs sync path operations in a threadpool automatically so they don't block the event loop. |
 | ORM / DB | SQLAlchemy 2.0, SQLite | `src/db.py`'s docstring states the six ORM models are kept in one module because they share foreign keys and are few enough that splitting them would only add indirection. SQLite specifically: one file, no server process, per `DB_PATH` in the same module. |
 | Key hashing | `argon2-cffi` (Argon2id) | `src/auth/keys.py`'s module docstring: "Argon2id via argon2-cffi (OWASP-recommended, argon2-cffi's PasswordHasher default)". |
-| Admin UI | Streamlit | `src/ui/app.py`'s docstring: "a thin HTTP client of this project's own admin API... It never touches the DB directly" — the stated reason is that this makes it structurally impossible for the UI to read anything a route doesn't already expose (in particular, prompt/response text, which no route exposes at all). |
+| Admin UI | Streamlit | `src/ui/app.py`'s docstring: "a thin HTTP client of this project's own admin API... It never touches the DB directly"; the stated reason is that this makes it structurally impossible for the UI to read anything a route doesn't already expose (in particular, prompt/response text, which no route exposes at all). |
 | Dependency/env management | `uv` (`uv.lock`, `pyproject.toml`) | `run.cmd` comments state the project uses `uv`, not `pip`, throughout. |
 | Provider SDKs | `ollama`, `openai`, `google-genai` | One per upstream; see `docs/ARCHITECTURE.md` "External systems". Agnes AI reuses the `openai` SDK because its endpoint is OpenAI-compatible (stated in `src/providers/agnes_provider.py`'s docstring), rather than because the code needs a second HTTP client library. |
 
@@ -54,22 +54,22 @@ These are stated directly in code (docstrings/comments), not inferred:
 Three exception hierarchies, one per concern, each instance carrying a
 `code: str` and `http_status: int`:
 
-- `AuthError` and subclasses (`src/auth/errors.py`) —
+- `AuthError` and subclasses (`src/auth/errors.py`):
   `missing_credentials`, `invalid_key`, `key_revoked`, `tenant_suspended`,
   `invalid_admin_token`.
-- `QuotaError` and subclasses (`src/quota/errors.py`) —
+- `QuotaError` and subclasses (`src/quota/errors.py`):
   `MODEL_NOT_ALLOWED`, `PROVIDER_NOT_ALLOWED`, `MAX_TOKENS_PER_REQUEST`,
   and the `RateLimitError` subclasses `RATE_RPM`, `RATE_RPD`,
   `BUDGET_MONTH` (these three also carry a `retry_after: int`).
 - `ProviderError` and its one subclass `UpstreamUnavailableError`
-  (`src/providers/errors.py`) — code `UPSTREAM_UNAVAILABLE`.
+  (`src/providers/errors.py`); code `UPSTREAM_UNAVAILABLE`.
 
 `src/api/app.py` registers one `@app.exception_handler` per base class
 (`AuthError`, `QuotaError`, `ProviderError`), each returning
 `JSONResponse({"error": exc.code}, status_code=exc.http_status)`; the
 `QuotaError` handler additionally sets a `Retry-After` header when the
 exception is a `RateLimitError`. `src/api/admin_routes.py`'s 404s do not
-go through this system — they raise FastAPI's own `HTTPException`
+go through this system; they raise FastAPI's own `HTTPException`
 directly, which produces `{"detail": "..."}` instead of `{"error": ...}`.
 This is a real inconsistency in the current code, not a documentation gap.
 
@@ -79,7 +79,7 @@ missing key is a deterministic `UpstreamUnavailableError` rather than
 whatever exception the SDK itself would raise. The Ollama adapter instead
 catches `ConnectionError` around the actual `client.chat()` call
 (`src/providers/ollama_provider.py`) because there is no "key" to check in
-advance — an unreachable host is only known once the request is attempted.
+advance; an unreachable host is only known once the request is attempted.
 
 ## Persistence
 
@@ -88,7 +88,7 @@ relative to the repository root; the parent directory is created if
 missing). Schema is created by `Base.metadata.create_all()`
 (`src/db.py::init_db`), called at process startup by the API's FastAPI
 `lifespan` handler, by `src/tenants/seed_dev.py`, and by `src/quota/cli.py`
-— it is idempotent (only creates missing tables) and is called
+; it is idempotent (only creates missing tables) and is called
 unconditionally on every run rather than gated behind a migration step.
 
 Tests use `sqlite:///:memory:` through the same `make_engine()` function,

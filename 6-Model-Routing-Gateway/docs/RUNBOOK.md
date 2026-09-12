@@ -53,7 +53,7 @@ uv run pytest tests/ -q
 
 `GatewayResponse.ok == False` means all targets in the fallback chain failed. Check:
 
-1. **`response.attempts`** — each `AttemptRecord` has `provider`, `model`, `ok`, `error`, `latency_ms`.
+1. **`response.attempts`**; each `AttemptRecord` has `provider`, `model`, `ok`, `error`, `latency_ms`.
 2. **Common errors:**
 
 | Error | Cause | Fix |
@@ -90,7 +90,7 @@ ollama run <new-model-name>
 uv run python -m src.route.eval --fail-on-mismatch
 ```
 
-Runs 5 deterministic cases from `tests/eval/routes.jsonl`. Uses `ALL_AVAILABLE = lambda p, m: True` — no GPU or API keys required. Exit code 1 if any case fails. Run this before merging any change to `router.py`, `features.py`, `features.yaml`, or `tiers.yaml`.
+Runs 5 deterministic cases from `tests/eval/routes.jsonl`. Uses `ALL_AVAILABLE = lambda p, m: True`; no GPU or API keys required. Exit code 1 if any case fails. Run this before merging any change to `router.py`, `features.py`, `features.yaml`, or `tiers.yaml`.
 
 ---
 
@@ -127,7 +127,7 @@ uv run python -m src.cost --day today
 | `config/tiers.yaml` | Tier → ordered target list |
 | `config/prices.yaml` | Per-model token rates |
 | `config/features.yaml` | Keyword groups, token buckets, scoring weights |
-| `src/route/router.py` | `route()` — tier selection and fallback chain |
-| `src/route/executor.py` | `execute()` — provider calls and fallback loop |
+| `src/route/router.py` | `route()`; tier selection and fallback chain |
+| `src/route/executor.py` | `execute()`; provider calls and fallback loop |
 | `src/cost/ledger.py` | `log_event()`, `aggregate()`, `estimate_cost()` |
 | `logs/usage/` | Per-request JSONL events |

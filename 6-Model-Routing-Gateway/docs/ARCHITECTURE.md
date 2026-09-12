@@ -2,7 +2,7 @@
 
 ## What this service is
 
-The Model Routing Gateway is a **routing, fallback, and cost-tracking layer**. It receives a prompt, auto-classifies its complexity, selects the appropriate tier, calls the model, retries on failure, and returns a `GatewayResponse` with text, usage counts, and a cost estimate.
+The Model Routing Gateway routes requests, handles fallbacks, and tracks cost. It receives a prompt, classifies its complexity, selects a tier, calls the model, retries failures, and returns a `GatewayResponse` with text, usage counts, and a cost estimate.
 
 ---
 
@@ -79,7 +79,7 @@ complexity_score =
   + min(1, n_sentences / 20)    × 0.05
 ```
 
-Labels: `simple` (< 0.35) · `medium` (0.35–0.64) · `hard` (≥ 0.65)
+Labels: `simple` (< 0.35), `medium` (0.35 to 0.64), and `hard` (≥ 0.65)
 
 ---
 

@@ -22,7 +22,7 @@ flowchart TD
 `GET /v1/models`, `GET /v1/usage`, and the `/admin/tenants/...` routes
 follow the same auth step (`get_context` for tenant routes,
 `require_admin` -> `verify_admin` for admin routes, both in
-`src/api/deps.py`) but do not call `check_quota` or any provider — they
+`src/api/deps.py`) but do not call `check_quota` or any provider; they
 only read or write rows through SQLAlchemy.
 
 ## Main types and where they live
@@ -30,9 +30,9 @@ only read or write rows through SQLAlchemy.
 | Type | File | Notes |
 |---|---|---|
 | `Tenant`, `ApiKey`, `PlanLimits`, `UsageEvent`, `AuditEvent`, `PromptLog` | `src/db.py` | SQLAlchemy 2.0 ORM models, one `Base`, one file |
-| `RequestContext` | `src/auth/context.py` | frozen dataclass: `tenant_id`, `key_id` — the only way a route learns who is calling |
+| `RequestContext` | `src/auth/context.py` | frozen dataclass: `tenant_id`, `key_id`; the only way a route learns who is calling |
 | `QuotaStatus` | `src/quota/limiter.py` | dataclass returned by `remaining_quota()` |
-| `ProviderResult` | `src/providers/base.py` | dataclass: `text`, `in_tokens`, `out_tokens` — the common return shape every provider module produces |
+| `ProviderResult` | `src/providers/base.py` | dataclass: `text`, `in_tokens`, `out_tokens`; the common return shape every provider module produces |
 | Pydantic request/response models (`TenantCreate`, `ChatRequest`, `UsageReport`, etc.) | `src/schemas.py` | one file, all schemas |
 | `AuthError`, `QuotaError`, `ProviderError` (and subclasses) | `src/auth/errors.py`, `src/quota/errors.py`, `src/providers/errors.py` | each carries a `code: str` and `http_status: int`; caught by exception handlers in `src/api/app.py` |
 
@@ -75,7 +75,7 @@ therefore not documented here.
 `dependencies=[Depends(require_admin)]` set once on the router, so every
 route under it requires `X-Admin-Token` without repeating that dependency
 per route. The route functions are thin: they 404 (via `HTTPException`,
-not the app's usual `{"error": ...}` shape — see `docs/RUNBOOK.md`) when a
+not the app's usual `{"error": ...}` shape; see `docs/RUNBOOK.md`) when a
 `tenant_id` or `key_id` doesn't resolve, call one function in
 `src/tenants/service.py`, write an `AuditEvent`, and commit.
 

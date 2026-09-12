@@ -1,6 +1,6 @@
 # Model Routing Gateway
 
-Routes LLM requests across three cost tiers, retries on failure, and records an estimated cost and latency for every request. Unit economics are first-class.
+Routes LLM requests across three cost tiers, retries failed calls, and records estimated cost and latency for every request. Unit economics are part of the design.
 
 ---
 
@@ -32,7 +32,7 @@ Expected: `"tier_used": "lite"`, `"model": "qwen3.5:0.8b"`
 uv run python -m src.gateway --text "Extract all line items, quantities, prices and totals from this invoice into structured output as a json schema format." --need-json
 ```
 
-Expected: `"tier_used"` is `"mid"` or `"heavy"` (never `"lite"` — hard+need_json blocks it).
+Expected: `"tier_used"` is `"mid"` or `"heavy"` (never `"lite"`; hard+need_json blocks it).
 
 **Daily cost summary:**
 
@@ -90,7 +90,7 @@ run.cmd          # syncs deps, loads .env, warns if Ollama is down, opens Stream
 
 Browser opens at `http://localhost:8501`.
 
-**Ollama not required** — if it's down, local (lite/mid) targets are skipped and cloud (heavy) targets are used instead, provided the relevant API keys are set.
+If Ollama is down, local (lite/mid) targets are skipped. Cloud (heavy) targets are used when the relevant API keys are set.
 
 ---
 
@@ -106,7 +106,7 @@ GOOGLE_API_KEY=...
 OLLAMA_HOST=http://localhost:11434   # optional; default shown
 ```
 
-Missing keys: that provider is silently skipped.
+When a key is missing, that provider is silently skipped.
 
 ---
 
@@ -155,18 +155,18 @@ docs/          ARCHITECTURE.md  TECHNICAL.md  TIERS.md  COST.md  RUNBOOK.md  EVA
 
 ## Known limitations
 
-- Cost figures are config-driven estimates (`config/prices.yaml`), never reconciled against real invoices — see `docs/COST.md`.
+- Cost figures are config-driven estimates (`config/prices.yaml`), never reconciled against real invoices; see `docs/COST.md`.
 - Retry is limited to one attempt on a 5xx response, per target, inside each provider adapter (`src/providers/*.py`). There is no exponential backoff and no retry on other error classes.
 - "One Ollama model resident at a time" (RTX 4060 8 GB) is an operational constraint from `.claude/CLAUDE.md`; the router does not enforce or check GPU memory.
-- The Streamlit UI has no authentication — anyone who can reach `http://localhost:8501` can view the Dashboard and the Config tab, which prints the raw contents of `config/tiers.yaml` and `config/prices.yaml`.
+- The Streamlit UI has no authentication; anyone who can reach `http://localhost:8501` can view the Dashboard and the Config tab, which prints the raw contents of `config/tiers.yaml` and `config/prices.yaml`.
 - No CI is configured in this repository (no `.github/workflows`); `pytest` and the routing eval are run manually per `docs/RUNBOOK.md`.
-- The routing eval (`tests/eval/routes.jsonl`) checks routing decisions only. It does not evaluate actual model output quality, real provider latency, or cost accuracy against real invoices — see `docs/EVAL.md`.
+- The routing eval (`tests/eval/routes.jsonl`) checks routing decisions only. It does not evaluate actual model output quality, real provider latency, or cost accuracy against real invoices; see `docs/EVAL.md`.
 
 ---
 
 ## Contributing
 
-No `docs/CONTRIBUTING.md` — there is no CI, no branch policy, and no formal review process in this repository to document; it currently has a single maintainer. If that changes, add branch and test expectations here once they exist.
+No `docs/CONTRIBUTING.md`; there is no CI, no branch policy, and no formal review process in this repository to document; it currently has a single maintainer. If that changes, add branch and test expectations here once they exist.
 
 ---
 

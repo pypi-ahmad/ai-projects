@@ -1,10 +1,10 @@
 # Task
 
-**Support ticket → structured JSON.** One narrow, specialized format — not generic chat. Chosen
+**Support ticket → structured JSON.** One narrow, specialized format; not generic chat. Chosen
 so LoRA has something concrete to earn its keep on (a fixed output schema), and so the bake-off
 against prompt-only has an unambiguous right/wrong answer per field.
 
-Data is 100% synthetic (teacher-generated), by design — this avoids scraping or fine-tuning on
+Data is 100% synthetic (teacher-generated), by design; this avoids scraping or fine-tuning on
 any copyrighted third-party ticket corpus.
 
 ## Input
@@ -22,7 +22,7 @@ Free-text customer support ticket, 2-5 sentences, first person.
 | `sentiment` | enum | `positive`, `neutral`, `negative` |
 | `next_action` | enum | `escalate`, `request_info`, `resolve`, `refund`, `schedule_callback` |
 
-All four are closed label sets (not free text) — this is a classification task expressed as JSON,
+All four are closed label sets (not free text); this is a classification task expressed as JSON,
 not open-ended generation. Assumption, adjustable: these six product categories and five actions
 were picked as a generic-but-plausible SaaS support taxonomy; there's no external label spec to
 match since the data is synthetic.
@@ -39,7 +39,7 @@ match since the data is synthetic.
 }
 ```
 
-(Real output, generated end-to-end via `granite4.1:3b` during Phase 2 smoke test — see
+(Real output, generated end-to-end via `granite4.1:3b` during Phase 2 smoke test; see
 `data/processed/train.jsonl`.)
 
 ## Success shape for the bake-off

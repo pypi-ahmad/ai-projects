@@ -14,9 +14,9 @@ usage).
   resolves against the same constraint).
 - [uv](https://docs.astral.sh/uv/) for dependency and environment
   management. The repository has no `requirements.txt`-based install path
-  as the primary route — `requirements.txt` is a generated export (see
+  as the primary route; `requirements.txt` is a generated export (see
   Configuration below). No uv version is pinned anywhere in the repo.
-- A local Ollama server if you want `/v1/chat` to actually reach a model —
+- A local Ollama server if you want `/v1/chat` to actually reach a model.
   the code defaults to `http://127.0.0.1:11434` and does not start Ollama
   itself. Not required to run the API or its tests.
 
@@ -95,28 +95,28 @@ Environment variables read directly by the code (grep-verified against
 
 | Variable | Read by | Default if unset |
 |---|---|---|
-| `ADMIN_TOKEN` | `src/auth/admin.py` | none — admin routes reject every request |
-| `OPENAI_API_KEY` | `src/providers/openai_compatible_provider.py` | none — that provider returns `UPSTREAM_UNAVAILABLE` |
+| `ADMIN_TOKEN` | `src/auth/admin.py` | none; admin routes reject every request |
+| `OPENAI_API_KEY` | `src/providers/openai_compatible_provider.py` | none; that provider returns `UPSTREAM_UNAVAILABLE` |
 | `OPENAI_BASE_URL` | `src/providers/openai_compatible_provider.py` | none |
-| `GOOGLE_API_KEY` | `src/providers/gemini_provider.py` | none — returns `UPSTREAM_UNAVAILABLE` |
-| `AGNES_API_KEY` (or `AGNESAI_API_KEY`) | `src/providers/agnes_provider.py` | none — returns `UPSTREAM_UNAVAILABLE` |
+| `GOOGLE_API_KEY` | `src/providers/gemini_provider.py` | none; returns `UPSTREAM_UNAVAILABLE` |
+| `AGNES_API_KEY` (or `AGNESAI_API_KEY`) | `src/providers/agnes_provider.py` | none; returns `UPSTREAM_UNAVAILABLE` |
 | `OLLAMA_HOST` | `src/providers/ollama_provider.py` | `http://127.0.0.1:11434` |
 | `HOST`, `PORT`, `ADMIN_UI_PORT` | `run.cmd` only (not read by Python code) | `127.0.0.1`, `8000`, `7011` |
 
 An `.env.example` file exists in the repository root as a template for
 these variables; this session could not read its exact contents (blocked
-by a local permission rule), so its content is not reproduced here — the
+by a local permission rule), so its content is not reproduced here; the
 table above is derived from the code that actually consumes each variable,
 which is the authoritative source regardless. `run.cmd` loads a `.env`
-file into the environment if one is present, but does not require one —
+file into the environment if one is present, but does not require one.
 variables already set in the environment work the same way. `.env` and
 `data/app.db` are both listed in `.gitignore`.
 
 Config files:
-- `pyproject.toml` — project metadata, dependencies, and
+- `pyproject.toml`; project metadata, dependencies, and
   `[tool.pytest.ini_options]` (`pythonpath = ["."]`, `testpaths = ["tests"]`).
-- `.streamlit/config.toml` — `[theme] base = "dark"` for the admin UI.
-- `requirements.txt` — generated from `uv.lock` via
+- `.streamlit/config.toml`; `[theme] base = "dark"` for the admin UI.
+- `requirements.txt`; generated from `uv.lock` via
   `uv export --format requirements.txt --no-dev`; not hand-edited, and does
   not include the `pytest` dev dependency.
 
@@ -145,7 +145,7 @@ uv run pytest
 ```
 29 tests across 5 files, verified passing at the time of writing. Tests
 use an in-memory SQLite database and a fake provider dispatcher
-(`tests/conftest.py`) — no test calls a real Ollama/Agnes/OpenAI/Gemini
+(`tests/conftest.py`); no test calls a real Ollama/Agnes/OpenAI/Gemini
 endpoint.
 
 ## Known limitations
@@ -162,12 +162,12 @@ external context:
   (`ChatResponse` in `src/schemas.py`); there is no streaming/SSE response
   path anywhere in `src/api/app.py`.
 - **No database migration tool.** `src/db.py::init_db` calls
-  `Base.metadata.create_all()`, which only creates missing tables — it does
+  `Base.metadata.create_all()`, which only creates missing tables; it does
   not alter existing ones. A schema change requires deleting
   `data/app.db` in development (see `src/db.py`'s `init_db` docstring).
 - **`prompt_logs` table is defined but never written.** `src/db.py`
   defines the `PromptLog` model and a `Tenant.store_prompts` flag, but no
-  code anywhere constructs a `PromptLog` row — the table is unconditionally
+  code anywhere constructs a `PromptLog` row; the table is unconditionally
   empty regardless of that flag's value.
 - **No route to list all tenants or to reactivate a suspended one.**
   `src/api/admin_routes.py` defines exactly six routes: create tenant,

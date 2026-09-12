@@ -1,23 +1,22 @@
 # Semantic Cache Layer
 
-Embedding-similarity cache for LLM query/answer pairs. Native Windows 11,
-no WSL2, no Docker. Embeddings run locally via Ollama on an RTX 4060 (8 GB);
-Qdrant runs embedded (in-process), not as a server.
+This is an embedding-similarity cache for LLM query and answer pairs. It runs
+natively on Windows 11, with no WSL2 or Docker. Embeddings run locally through Ollama on an
+RTX 4060 (8 GB), while Qdrant runs in process rather than as a server.
 
-> **Status: Phase 6.** Everything is implemented and verified against a
-> live Ollama + embedded Qdrant, including the Streamlit UI and the
-> generate-on-miss demo providers.
+> Phase 6 is implemented and verified against live Ollama and embedded Qdrant,
+> including the Streamlit UI and the generate-on-miss demo providers.
 
 ## Requirements
 
-- Python 3.14 (`.venv/pyvenv.cfg` records `3.14.7`) — not pinned by any
+- Python 3.14 (`.venv/pyvenv.cfg` records `3.14.7`); not pinned by any
   `pyproject.toml`/`.python-version` in this repo; `uv venv` built it
   against whatever `Python314` install was on `PATH`.
-- Ollama running locally with `qwen3-embedding:0.6b` pulled — required for
+- Ollama running locally with `qwen3-embedding:0.6b` pulled; required for
   every lookup (`docs/RUNBOOK.md`).
 - Python deps pinned in [`requirements.txt`](requirements.txt): pydantic,
   pytest, qdrant-client, pyyaml, streamlit, pandas, python-dotenv.
-- Native Windows 11. No WSL2, no Docker — `run.cmd` is the only launcher.
+- Native Windows 11. No WSL2, no Docker; `run.cmd` is the only launcher.
 
 ## Repo map
 
@@ -38,7 +37,7 @@ Qdrant runs embedded (in-process), not as a server.
 
 ## Hits vs. misses
 
-This is a *semantic* cache, not an exact-key cache:
+This is a *semantic* cache rather than an exact-key cache:
 
 1. Normalize the incoming query text.
 2. Embed it with the configured Ollama embedding model.
@@ -46,8 +45,8 @@ This is a *semantic* cache, not an exact-key cache:
    stored in Qdrant.
 4. If the best match's similarity score is **≥ threshold** → **hit**: return
    the stored answer, bump `hit_count`.
-5. Otherwise → **miss**: return a miss. This repo does not generate an
-   answer — the caller generates one and is responsible for storing the new
+5. Otherwise → **miss**: return a miss. The caller generates an
+   answer and is responsible for storing the new
    query/answer pair back into the cache.
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the diagram and
@@ -62,7 +61,7 @@ and threshold units.
 | Higher-quality embed (cache rebuild) | `qwen3-embedding:4b` |
 
 Both are pulled via Ollama (`ollama pull qwen3-embedding:0.6b`). Only one
-embedding model's vectors live in the Qdrant collection at a time — see
+embedding model's vectors live in the Qdrant collection at a time; see
 **Changing the embed model** below.
 
 ## Qdrant path
@@ -81,7 +80,7 @@ uv run python scripts/seed_demo.py
 run.cmd
 ```
 
-`run.cmd` checks Ollama is reachable (fails clearly if it isn't), creates
+`run.cmd` checks that Ollama is reachable, creates
 `.venv`/installs dependencies if needed, copies `.env.example` to `.env`
 on first run, and launches the Streamlit UI in your browser.
 
@@ -92,14 +91,14 @@ In the UI (namespace defaults to `demo`, matching the seed):
    password?" FAQ, score ≈0.94).
 2. Type something unrelated, e.g. **"What's the airspeed velocity of an
    unladen swallow?"** → **Miss**. Optionally pick a provider and click
-   **Generate and store** to fill the cache live (demo only —
+   **Generate and store** to fill the cache live (demo only;
    `docs/ARCHITECTURE.md`).
 3. Scroll down for the last 50 metric events and hit rate for the
    namespace (`data/cache/metrics.jsonl`), and buttons to clear the
    namespace or export the metrics log.
 
 Not every paraphrase clears the default 0.89 threshold with
-`qwen3-embedding:0.6b` — see the threshold section in
+`qwen3-embedding:0.6b`; see the threshold section in
 [`docs/TECHNICAL.md`](docs/TECHNICAL.md) for real measured scores across
 several paraphrasings of the seeded FAQs.
 
@@ -119,7 +118,7 @@ python -m src.cache get --query "What's the capital city of France?" --namespace
 `get` prints `{"hit": true, "type": "exact"|"semantic", "answer", "score", "matched_query"}`
 on a hit, or `{"hit": false, "top1_score": <score or null>}` on a miss.
 `put` prints `{"rejected": true, "reason": "..."}` (exit code 1) if
-`config/cache.yaml` policy refuses the answer — see
+`config/cache.yaml` policy refuses the answer; see
 [`docs/CACHE_POLICY.md`](docs/CACHE_POLICY.md). Requires Ollama running
 (`docs/RUNBOOK.md`).
 
@@ -136,16 +135,16 @@ See [`docs/METRICS.md`](docs/METRICS.md).
 
 - **8 GB is enough for `qwen3-embedding:0.6b` + embedded Qdrant, with
   headroom.** The embed model is ~640 MB on disk (Q8_0 quant, per `ollama
-  list`) — the only real VRAM cost on this repo's hot path. Qdrant itself
+  list`); the only real VRAM cost on this repo's hot path. Qdrant itself
   doesn't touch VRAM at all: embedded mode is CPU/disk-backed
   (`data/cache/qdrant/collection/semantic_cache/storage.sqlite`).
 - Unload the embedding model when idle if anything else needs to load
   (Ollama `keep_alive: 0` on the `/api/embed` call, or right after a batch
   embed run).
-- Never load `granite4.1:3b` unless a debug path is explicitly invoked —
+- Never load `granite4.1:3b` unless a debug path is explicitly invoked.
   it's a generate-on-miss demo model, not part of the cache's hot path.
 - **Do not colocate `AuditAid/PaddleOCR-VL-1.6-0.9B`.** It's a
-  vision-language OCR model (~1.8 GB on disk) for a different workload —
+  vision-language OCR model (~1.8 GB on disk) for a different workload.
   image encoding needs buffers a text embedding call never does, so
   running OCR sessions alongside this cache risks VRAM pressure that
   doesn't show up from disk size alone. Keep OCR work in a separate
@@ -153,7 +152,7 @@ See [`docs/METRICS.md`](docs/METRICS.md).
 - One model loaded at a time is the working assumption on 8 GB; don't plan
   around running the embed model and a generation model concurrently.
 
-## Changing the embed model requires a wipe/rebuild
+## Changing the embed model requires a wipe and rebuild
 
 `qwen3-embedding:0.6b` (1024-dim) and `qwen3-embedding:4b` (2560-dim)
 produce vectors of different sizes and are not comparable. A Qdrant
@@ -163,12 +162,12 @@ lifetime. Switching the embed model means:
 1. Delete or recreate the collection at `data/cache/qdrant` (see
    [`docs/RUNBOOK.md`](docs/RUNBOOK.md)).
 2. Re-embed and re-populate every cached query with the new model before
-   the cache is useful again — there is no online migration.
+   the cache is useful again; there is no online migration.
 
 ## Generate-on-miss demo providers (`src/providers`)
 
-Optional, wired into the UI's "Generate and store" button on a miss —
-not this repo's core job (`NOTES.md`). Four providers, each one stdlib
+Optional providers are wired into the UI's "Generate and store" button on a miss.
+They are outside this repo's core job (`NOTES.md`). Each provider uses one stdlib
 `urllib` call (verified against each provider's own docs):
 
 | Provider | Models | Needs |
@@ -178,13 +177,13 @@ not this repo's core job (`NOTES.md`). Four providers, each one stdlib
 | OpenAI-compatible | `gpt-5.6-luna`, `gpt-5.6-terra` | `OPENAI_API_KEY` + `OPENAI_BASE_URL` env vars |
 | Gemini | `gemini-3.5-flash-lite`, `gemini-3.7-flash` | `GOOGLE_API_KEY` env var |
 
-A missing key surfaces as a clear in-UI error, not a crash.
-`granite4.1:3b` is deliberately not offered here — see the 4060 note
+A missing key appears as a clear in-UI error instead of a crash.
+`granite4.1:3b` is deliberately not offered here; see the 4060 note
 above.
 
 ## Known limitations
 
-- `data/cache/metrics.jsonl` grows without bound — append-only, no
+- `data/cache/metrics.jsonl` grows without bound; append-only, no
   rotation/retention (`docs/RUNBOOK.md`).
 - Switching the embed model requires a full manual wipe and re-embed;
   there is no online migration (`docs/RUNBOOK.md`, `docs/TECHNICAL.md`).
@@ -192,7 +191,7 @@ above.
   time.
 - The Streamlit UI reads `config/cache.yaml` once at process start
   (`@st.cache_resource`); only the threshold and embed model are
-  adjustable live from the sidebar — a `ttl_seconds`/`max_entries`/
+  adjustable live from the sidebar; a `ttl_seconds`/`max_entries`/
   `never_cache_regexes` change needs a process restart (`docs/RUNBOOK.md`).
 - `keep_alive` idle-unload is part of the documented Ollama contract but
   is not yet implemented in `src/embed/ollama_client.py` (`docs/TECHNICAL.md`).

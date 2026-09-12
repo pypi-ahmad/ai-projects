@@ -23,13 +23,12 @@ flowchart TD
     C --> W["Caller writes query + answer back into the cache\n(put(): policy check -> reject or embed+store; log 'put'/'reject'/'evict'"]
 ```
 
-The exact-match check is a namespace-filtered Qdrant `scroll` (payload
-lookup, no vector involved) — it runs before any embedding call, not as an
-optimization on top of the semantic path.
+The exact-match check is a namespace-filtered Qdrant `scroll` payload lookup
+with no vector involved. It runs before any embedding call.
 
 Every branch that returns a `Hit`/`Miss`, and every `put()` outcome
 (stored, rejected, or triggering an eviction), appends one line to
-`data/cache/metrics.jsonl` (`docs/METRICS.md`) — logging isn't a separate
+`data/cache/metrics.jsonl` (`docs/METRICS.md`); logging isn't a separate
 pass over the data, it happens inline where each decision is made.
 
 ## Stages
@@ -43,14 +42,14 @@ pass over the data, it happens inline where each decision is made.
 | Threshold | Compare the top hit's score against the configured cutoff (default 0.89) | `src/cache/service.py` |
 | Hit path | Return stored answer, increment `hit_count`/`last_hit_at` | `src/cache/service.py`, `src/store/qdrant_store.py` |
 | Miss path | Return a miss with the top-1 score for near-miss tracking; storing a new answer is the caller's job | `src/cache/service.py` |
-| Policy | TTL expiry (lazy delete), max-entries eviction, min-length/never-cache rejection, namespace, cross-model serving — `config/cache.yaml` | `src/policy/config.py`, `src/policy/enforcement.py` |
+| Policy | TTL expiry (lazy delete), max-entries eviction, min-length/never-cache rejection, namespace, cross-model serving; `config/cache.yaml` | `src/policy/config.py`, `src/policy/enforcement.py` |
 | Metrics | Per-call event log + hit-rate aggregation | `src/metrics/logger.py`, `src/metrics/aggregator.py` |
 | Providers | Optional generate-on-miss demo (one `urllib` call per provider) | `src/providers/generate.py` |
 | UI | Streamlit front end: namespace/threshold/embed-model controls, lookup, generate-and-store, metrics table, clear/export | `src/ui/app.py` |
 
 ## Explicitly out of the lookup path
 
-Generation on miss is not performed by the cache itself — `src/providers`
+Generation on miss is not performed by the cache itself; `src/providers`
 exists only to demo what a caller might do after a miss, wired into the
 UI's "Generate and store" button. See [`docs/CACHE_POLICY.md`](CACHE_POLICY.md)
 and [`docs/TECHNICAL.md`](TECHNICAL.md) for the pieces this diagram glosses

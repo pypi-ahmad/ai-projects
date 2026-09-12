@@ -3,7 +3,7 @@
 This repository has a test suite and a `dev` dependency group
 (`pyproject.toml`), so it is meant to be developed in. There is no CI
 configuration (no `.github/` directory) and no branch or PR policy
-documented anywhere in the repository — do not assume one; ask before
+documented anywhere in the repository; do not assume one; ask before
 following a workflow this file doesn't state.
 
 ## Environment
@@ -12,7 +12,7 @@ following a workflow this file doesn't state.
 uv sync
 ```
 Installs the default dependency group plus `dev` (`pytest`). The project
-uses `uv` exclusively — there is no evidence in the repo of a `pip`-based
+uses `uv` exclusively; there is no evidence in the repo of a `pip`-based
 install path being the primary one (`run.cmd`'s own comments say so
 explicitly).
 
@@ -26,7 +26,7 @@ Configuration is in `pyproject.toml`'s `[tool.pytest.ini_options]`
 `tests/test_api.py`, `tests/test_auth.py`, `tests/test_isolation.py`,
 `tests/test_quota.py`, `tests/test_tenancy_isolation.py`, all passing at
 the time of writing. Shared fixtures and helpers are in `tests/conftest.py`
-— an in-memory SQLite database per test and a fake provider dispatcher, so
+; an in-memory SQLite database per test and a fake provider dispatcher, so
 no test reaches a real Ollama/Agnes/OpenAI/Gemini endpoint or the real
 `data/app.db`.
 
@@ -35,7 +35,7 @@ it is a manual step.
 
 ## Code style
 
-No linter or type checker is configured in this repository —
+No linter or type checker is configured in this repository.
 `pyproject.toml`'s `dev` dependency group contains only `pytest`. There is
 no `ruff`, `mypy`, `ty`, or similar tool listed as a dependency, and no
 config section for one. Match the existing code's style (module-level
@@ -47,5 +47,5 @@ reading nearby files rather than a written style guide, since none exists.
 
 The repository does not state, anywhere: a branching model, commit message
 convention, PR review requirement, versioning scheme, or release process.
-Do not invent one when contributing — if a process decision is needed,
+Do not invent one when contributing; if a process decision is needed,
 ask.

@@ -6,7 +6,7 @@ Three tiers route requests from cheapest/fastest to most capable. Promotion is *
 
 ## Tier definitions
 
-### lite — Short, cheap, low-risk tasks
+### lite; Short, cheap, low-risk tasks
 
 | Field | Value |
 |-------|-------|
@@ -17,12 +17,12 @@ Three tiers route requests from cheapest/fastest to most capable. Promotion is *
 | Fallback | → mid |
 
 **When lite is ineligible (hard rules):**
-- `complexity_label == "hard"` AND `need_json == true` — hard + structured-output requests are never sent to lite regardless of preferred_tier or score thresholds.
-- `flags.has_image == true` — lite has no vision-capable target.
+- `complexity_label == "hard"` AND `need_json == true`; hard + structured-output requests are never sent to lite regardless of preferred_tier or score thresholds.
+- `flags.has_image == true`; lite has no vision-capable target.
 
 ---
 
-### mid — Default production tasks
+### mid; Default production tasks
 
 Targets are tried in order; first available wins:
 
@@ -38,7 +38,7 @@ Fallback: → heavy
 
 ---
 
-### heavy — Hard / long / structured-output tasks
+### heavy; Hard / long / structured-output tasks
 
 Targets are tried in order; first available wins:
 
@@ -72,7 +72,7 @@ Fallback: none. If all heavy targets fail, `GatewayResponse(ok=False)` is return
 - **openai**: target skipped if `OPENAI_API_KEY` is not set.
 - **gemini**: target skipped if `GOOGLE_API_KEY` is not set.
 
-A missing key is never a crash — that target is silently omitted from the fallback chain.
+A missing key is never a crash; that target is silently omitted from the fallback chain.
 
 ---
 

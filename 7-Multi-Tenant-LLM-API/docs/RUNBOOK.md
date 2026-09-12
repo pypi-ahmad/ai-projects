@@ -48,22 +48,22 @@ Every code below is a literal string from the source, not paraphrased.
 | Response | Where raised | Meaning |
 |---|---|---|
 | `{"error": "missing_credentials"}`, 401 | `src/auth/resolve.py` | No `Authorization` or `X-Api-Key` header on a tenant route. |
-| `{"error": "invalid_key"}`, 401 | `src/auth/resolve.py` | No active key's hash matched — covers both an unrecognized key and a wrong secret for a real prefix. |
+| `{"error": "invalid_key"}`, 401 | `src/auth/resolve.py` | No active key's hash matched; covers both an unrecognized key and a wrong secret for a real prefix. |
 | `{"error": "key_revoked"}`, 401 | `src/auth/resolve.py` | The key matched, but its `revoked_at` is set. |
 | `{"error": "tenant_suspended"}`, 403 | `src/auth/resolve.py`, `src/quota/limiter.py` | The key is valid but the owning tenant's `status` is `suspended`. |
 | `{"error": "invalid_admin_token"}`, 401 | `src/auth/admin.py` | `X-Admin-Token` missing, wrong, or `ADMIN_TOKEN` is unset/empty in the server's environment. |
 | `{"error": "MODEL_NOT_ALLOWED"}`, 403 | `src/quota/limiter.py` | Requested (or default) model isn't in the tenant's `plan_limits.allowed_models`. |
-| `{"error": "PROVIDER_NOT_ALLOWED"}`, 403 | `src/quota/limiter.py` | The model resolves to a provider not in `plan_limits.allowed_providers` — also the result when a model isn't in `src/providers/registry.py::MODEL_PROVIDERS` at all, since that resolves to no provider. |
+| `{"error": "PROVIDER_NOT_ALLOWED"}`, 403 | `src/quota/limiter.py` | The model resolves to a provider not in `plan_limits.allowed_providers`; also the result when a model isn't in `src/providers/registry.py::MODEL_PROVIDERS` at all, since that resolves to no provider. |
 | `{"error": "MAX_TOKENS_PER_REQUEST"}`, 400 | `src/quota/limiter.py` | Client's `max_tokens` exceeds `plan_limits.max_tokens_per_req`. Only checked if the client sent `max_tokens`. |
 | `{"error": "RATE_RPM"}` / `"RATE_RPD"`, 429, with a `Retry-After` header | `src/quota/limiter.py` | Requests-per-minute or requests-per-day limit reached. |
 | `{"error": "BUDGET_MONTH"}`, 429, with a `Retry-After` header | `src/quota/limiter.py` | Monthly token budget already used, plus this request's estimate, exceeds `token_budget_month`. |
 | `{"error": "UPSTREAM_UNAVAILABLE"}`, 503 | `src/providers/*.py` | Missing platform API key for the resolved provider, or the provider (Ollama, most likely) is unreachable. Never a bare 500 for this case. |
-| `{"detail": "tenant not found"}`, 404 | `src/api/admin_routes.py` | Admin route's `tenant_id` path segment doesn't match any tenant. Note the key is `detail`, not `error` — this is FastAPI's default `HTTPException` body, unlike every other error in this API. |
+| `{"detail": "tenant not found"}`, 404 | `src/api/admin_routes.py` | Admin route's `tenant_id` path segment doesn't match any tenant. Note the key is `detail`, not `error`; this is FastAPI's default `HTTPException` body, unlike every other error in this API. |
 | `{"detail": "key not found for this tenant"}`, 404 | `src/api/admin_routes.py` | The revoke-key route's `key_id` either doesn't exist or belongs to a different tenant than the `tenant_id` in the path. |
 
 Other failure not represented as a JSON error:
 
-- `sqlalchemy.exc.OperationalError: no such table: ...` — happens if
+- `sqlalchemy.exc.OperationalError: no such table: ...`; happens if
   `data/app.db` predates a schema change in `src/db.py`. `init_db()`
   (`Base.metadata.create_all()`) only adds missing tables; it does not
   alter existing ones (see `docs/TECHNICAL.md` "Persistence"). Delete
