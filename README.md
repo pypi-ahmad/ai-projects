@@ -1,14 +1,15 @@
 # LLM Engineering Projects
 
-A tutorial monorepo of 16 independent Python projects covering retrieval, structured output, context
-management, evaluation, caching, routing, agents, and document parsing. Each numbered folder has its own
-code, dependencies, environment, launcher, and README. You can study one component or follow the full
-path. The projects are not wired together into one application.
+This public tutorial monorepo contains 16 independent Python projects for learning practical LLM
+engineering: retrieval, structured output, context management, evaluation, caching, routing, agents, and
+document parsing. Each numbered folder is self-contained, with its own code, dependencies, environment,
+launcher, and README. You can work through the complete sequence or clone the repository to study and run
+one project at a time. The projects are separate examples and do not form one combined application.
 
 ## Suggested order
 
-Follow **1 → 16**: start with RAG, move through the components around an LLM call, and finish with tool
-use, a RAG agent, and document parsing. The order is a learning path, not an installation dependency.
+Follow **1 → 16** to start with RAG, move through the components around an LLM call, and finish with tool
+use, a RAG agent, and document parsing. The sequence is for learning. Each project can be run on its own.
 
 | If you only want… | Start here |
 | --- | --- |
@@ -23,33 +24,39 @@ use, a RAG agent, and document parsing. The order is a learning path, not an ins
 
 ## Run one project
 
-Use a native Windows terminal. Install [uv](https://docs.astral.sh/uv/) and check the chosen child's
-Python requirement before setup. Launchers that call `python` directly also need a compatible Python on
-`PATH`. Python versions differ between children; there is no root environment or root dependency-install
-command.
+Use a native Windows terminal. Install [uv](https://docs.astral.sh/uv/), then check the chosen child's
+Python requirement. Launchers that call `python` directly also need a compatible Python on `PATH`.
+Python versions differ by project, so there is no root environment or root dependency-install command.
 
-From your clone's root, try the context-packing demo:
+If you have not cloned the repository yet:
+
+```powershell
+git clone https://github.com/pypi-ahmad/ai-projects.git
+Set-Location .\ai-projects
+```
+
+From the clone's root, start with the context-packing demo:
 
 ```powershell
 Set-Location .\3-Context-Assembly-Service
 .\run.cmd
 ```
 
-This installs only project 3's dependencies and opens its Streamlit UI. Click **Load sample**, leave
-compression **off**, and click **Assemble**. Packing needs no GPU, Ollama, or API key; initial
-dependency/tokenizer downloads can still need internet access.
+This installs project 3's dependencies and opens its Streamlit UI. Click **Load sample**, leave
+compression **off**, then click **Assemble**. Packing needs no GPU, Ollama, or API key. Initial
+dependency and tokenizer downloads can still need internet access.
 
 For another project, enter its numbered folder and follow its start line below. Always launch from inside
-that folder: some scripts rely on the current directory. Keep each child's `.venv` separate. Project 8
-needs `uv sync` before its launcher; the other launchers include dependency setup. Many apps share port
-`8501` or `8000`, so start with one project at a time.
+that folder because some scripts rely on the current directory. Keep each child's `.venv` separate.
+Project 8 needs `uv sync` before its launcher; the other launchers include dependency setup. Many apps
+use port `8501` or `8000`, so run one project at a time.
 
-## Shared conventions and exceptions
+## Shared setup rules
 
-- All 16 folders contain `run.cmd`. Some launchers use uv; others use Python, venv, and pip. Follow the setup in the child you choose rather than combining dependency files. No child requires WSL2 for this local path; consult its documentation for another platform.
-- There is no monorepo-wide GPU requirement. Project 8's documented training setup uses an NVIDIA CUDA GPU. Several local-model projects target an 8 GB GPU. Packing, rule checks, registry operations, and synthetic demos can run without one.
-- Ollama is needed only for features that call it. Start the service and pull the selected project's models. `ollama list` checks reachability and installed tags. Cloud generation may still leave a local embedding dependency.
-- Configure only the provider or service you use. Every child has an empty-value `.env.example`. The [root catalog](.env.example) lists all names and points to the relevant project; it is not a shared configuration file. Follow each template's loading notes and remove unused empty assignments so defaults keep working. There is no shared root `.env` loader. Projects 2, 8, 9, 10, 11, 12, 13, and 14 do not automatically load `.env`; use their process or shell environment. Project 2 can copy a template without loading it.
+- All 16 folders contain `run.cmd`. Some launchers use uv; others use Python, venv, and pip. Follow the selected child's setup. Do not combine dependency files. No child requires WSL2 for this local path; consult its documentation for other platforms.
+- GPU requirements vary by project. Project 8's documented training setup uses an NVIDIA CUDA GPU, and several local-model projects target an 8 GB GPU. Packing, rule checks, registry operations, and synthetic demos can run without one.
+- Ollama is needed only for features that call it. Start the service and pull the models named by that project. `ollama list` checks the installed tags. Cloud generation can still require a local embedding dependency.
+- Configure only the provider or service you use. Every child has an empty-value `.env.example`. The [root catalog](.env.example) lists all variable names and their projects. It lists configuration; it does not load or share it. Follow each template's loading notes and remove unused empty assignments so defaults keep working. There is no shared root `.env` loader. Projects 2, 8, 9, 10, 11, 12, 13, and 14 do not automatically load `.env`; use their process or shell environment. Project 2 can copy a template without loading it.
 
 ### Ollama model selection
 
@@ -69,7 +76,7 @@ determine what each operation accepts. Pull only the models you need.
 | `AuditAid/PaddleOCR-VL-1.6-0.9B` | OCR in projects that wire it in |
 
 See [project 1's catalogue](1-Production-RAG-Pipeline/src/rag_pipeline/config.py) for one concrete
-definition. A listed embedding or OCR model is not automatically a chat model for every project.
+definition. Check the selected project before using an embedding or OCR model for chat.
 
 ### Environment-variable names
 
@@ -120,8 +127,8 @@ Start: `.\run.cmd` (Streamlit UI).
 
 Build a quality-checking workflow using fixed datasets, deterministic metrics, an optional validated LLM
 judge, baselines, and regression gates. Live candidates/judges need Ollama or the chosen cloud provider's
-credentials. Scoring frozen candidate fixtures needs neither a GPU nor a live model. The root [evaluation
-workflow](.github/workflows/llm-eval.yml) uses that fixture path when cloud secrets are absent.
+credentials. Scoring frozen candidate fixtures needs neither a GPU nor a live model. When cloud secrets
+are absent, the root [evaluation workflow](.github/workflows/llm-eval.yml) uses that fixture path.
 
 Start: `.\run.cmd` (Streamlit UI). The child README documents the CLI stages.
 
@@ -167,8 +174,8 @@ Start: `uv sync`, then `.\run.cmd` for the UI. After dataset preparation, use `.
 Build working, episodic, and semantic memory with eviction, compression, fact distillation, and
 token-budgeted recall. Full memory flows need Ollama with `qwen3-embedding:0.6b` and `qwen3.5:0.8b`; the
 UI can still expose working/episodic memory when Ollama is unavailable. No cloud credentials are needed:
-that provider module is a stub. Your caller must trigger maintenance; this library is not an autonomous
-agent or scheduler.
+that provider module is a stub. The caller triggers maintenance. The library does not run it as an
+autonomous agent or scheduler.
 
 Start: `.\run.cmd` (Streamlit inspector on `7013`).
 
@@ -195,7 +202,7 @@ second terminal in the same folder.
 ### 12. [Prompt Versioning and A/B System](12-Prompt-Versioning-and-AB-System/README.md)
 
 Build a SQLite-backed prompt registry with immutable versions, environment pointers, rollback, sticky
-weighted experiments, and outcome tracking. No GPU, Ollama, or model API keys are needed: execution is
+weighted experiments, and outcome tracking. No GPU, Ollama, or model API keys are needed. Execution stays
 dry until a completer is registered, and none is wired in by default. The API generates an admin token
 unless `PROMPTREG_ADMIN_TOKEN` is set; the UI accesses the stores directly.
 
@@ -232,10 +239,10 @@ Start: `.\run.cmd` (builds the demo index if absent, then opens the UI on `7019`
 ### 16. [Agentic Document Extraction](16-Agentic-Document-Extraction/README.md)
 
 Build a vision-model parser that produces layout-aware Markdown/HTML and annotated PDF/PNG outputs for
-human review. The active graph is preprocess to parse. The older invoice-validation and commit/review flow
-is disconnected. Parsing needs `OPENAI_API_KEY` and access to a configured Terra/Luna model. Set
-`OPENAI_BASE_URL` for a compatible gateway. No Ollama or local GPU is required. The launcher stops any
-process already listening on `5805`, so free that port first.
+human review. The active graph runs from preprocess to parse. The older invoice-validation and
+commit/review flow is disconnected. Parsing needs `OPENAI_API_KEY` and access to a configured Terra/Luna model. Set
+`OPENAI_BASE_URL` for a compatible gateway. No Ollama or local GPU is required. The launcher terminates
+any process already listening on `5805`; do not use it while another application needs that port.
 
 Start: `.\run.cmd` (UI on `5805`; upload a document and click **Parse**).
 
@@ -247,8 +254,8 @@ supported; use empty placeholders in `.env.example`. Indexes, databases, model w
 generated document outputs stay outside the publication candidate. See [.gitignore](.gitignore) and
 [SECRET_SCAN.md](SECRET_SCAN.md).
 
-Public source does not mean the demo servers are safe to expose publicly. Read each child's security and
-limitations notes before changing its bind address or using sensitive input.
+The demo servers are not safe to expose publicly by default. Read each child's security and limitations
+notes before changing its bind address or using sensitive input.
 
 ## License
 
