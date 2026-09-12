@@ -253,3 +253,5 @@ limitations notes before changing its bind address or using sensitive input.
 
 The root [LICENSE](LICENSE) contains the MIT License. External model weights and dependencies retain
 their own licenses.
+
+<p align="center">Made with ❤️ by Ahmad Mujtaba</p>
