@@ -2,7 +2,7 @@
 
 Implemented in `src/obs/alerts/`. Config in `config/alerts.yaml`.
 
-Rolling window stats are computed on read (`src/obs/alerts/stats.py`) — no
+Rolling window stats are computed on read (`src/obs/alerts/stats.py`); no
 materialized rollup table. Every evaluation pass re-queries
 `spans`/`traces`/`usage` and aggregates in Python (`statistics.quantiles`
 for p50/p95). Evaluated per `(route, model)` pair; spans with no `model` set
@@ -24,10 +24,10 @@ Exact thresholds/windows: `config/alerts.yaml`.
 
 ## Cooldown (idempotency)
 
-`cooldown_minutes` (config, default 30) — once a rule fires for a given
+`cooldown_minutes` (config, default 30); once a rule fires for a given
 `(rule, route)`, no new alert for that same `(rule, route)` is created until
 the cooldown elapses, even if the rule would still fire. Dedup key is
-`(rule, route)` only, not `model` — a route with several models sharing the
+`(rule, route)` only, not `model`; a route with several models sharing the
 same rule name shares one cooldown clock.
 
 ## Alert row
@@ -45,7 +45,7 @@ uv run python -m obs.alerts.eval --once
 ```
 
 One pass over every `(route, model)` pair with activity in the last 24
-hours, all enabled rules. Not a daemon/loop yet — run it on a schedule
+hours, all enabled rules. Not a daemon/loop yet; run it on a schedule
 externally (Task Scheduler, a cron-like wrapper) if continuous evaluation
 is wanted.
 
@@ -58,5 +58,5 @@ is wanted.
 ## Not implemented
 
 - The Phase 1 idea of an optional local-LLM anomaly note. There is no
-  `llm_note` field on `Alert` (`src/obs/alerts/models.py`) — an earlier
+  `llm_note` field on `Alert` (`src/obs/alerts/models.py`); an earlier
   version of this doc incorrectly claimed there was.

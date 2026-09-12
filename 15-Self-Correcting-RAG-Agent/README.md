@@ -3,7 +3,7 @@
 Retrieval-augmented question answering over a local document corpus, built as an agent loop
 rather than a single retrieval call. Given a question, the system rewrites it, retrieves with
 a hybrid dense+lexical search, critiques its own retrieval, and then either answers with
-citations, retries with a rewritten query, falls back to a web search, or abstains -- instead
+citations, retries with a rewritten query, falls back to a web search, or abstains; instead
 of answering when the corpus doesn't support an answer. For example, against the seeded demo
 corpus it answers "What VPN client is required for remote access?" (citing the source file)
 but abstains on "What is the CEO's favorite color?" (not in the corpus).
@@ -61,7 +61,7 @@ All of the above are run with `uv run python -m ...` if using `uv`, or
 
 Settings are read from process environment variables through `pydantic-settings`
 (`config.py: Settings`, `env_file=".env"`). No `.env` or `.env.example` file exists in this
-working tree -- `run.cmd` writes `.env.example` on first run (Write access to `.env*` files is
+working tree; `run.cmd` writes `.env.example` on first run (Write access to `.env*` files is
 blocked for the assistant that built this repo, per a comment in `SPEC.md`; that restriction
 does not apply to a normal shell). Variables the code reads:
 
@@ -119,7 +119,7 @@ Everything below is drawn from code comments or a documented live observation, n
 - Sentence splitting during chunking is a regex heuristic that misreads abbreviations and
   decimals as sentence boundaries (`ingest/chunker.py`).
 - Scanned-PDF detection is a character-count heuristic with no layout analysis. Pages it
-  flags as scans are skipped, not OCR'd -- `AuditAid/PaddleOCR-VL-1.6-0.9B` is listed as an
+  flags as scans are skipped, not OCR'd; `AuditAid/PaddleOCR-VL-1.6-0.9B` is listed as an
   allowed model in `config.py` but is not called from anywhere in `ingest/` (verified: no
   reference to that model string outside `config.py`).
 - The web-fetch safety check validates a URL's resolved IP and then connects separately; the
@@ -129,7 +129,7 @@ Everything below is drawn from code comments or a documented live observation, n
   `run()` does not catch this; only its `run_safe()` wrapper does (used by the UI and the
   eval runner). Documented in `SPEC.md`.
 - A recorded eval run (`SPEC.md`) found 2 of 3 in-corpus/needs-rewrite eval questions
-  abstained rather than answered -- a retrieval/critique precision issue the 3 implemented
+  abstained rather than answered; a retrieval/critique precision issue the 3 implemented
   eval metrics do not measure.
 - Confidence reported after a web-fallback answer reuses the critique score computed before
   the web fetch; there is no re-critique of the web-augmented context (`agent/loop.py`).

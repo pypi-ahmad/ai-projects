@@ -12,7 +12,7 @@ tools, making manual calls, and chatting through the tool-calling loop.
 - Python 3.13. `.python-version` at the repo root pins `3.13`; `run.cmd`
   requests the more specific `3.13.15` when creating the virtual environment.
   This session verified `3.13.15` running.
-- [`uv`](https://docs.astral.sh/uv/) — every setup/run command in this repo
+- [`uv`](https://docs.astral.sh/uv/); every setup/run command in this repo
   (`run.cmd` included) uses `uv venv` / `uv pip install` / `uv run`. There is
   no documented plain-`pip` path, though `requirements.txt` is in standard
   pip-compatible format.
@@ -39,7 +39,7 @@ it doesn't exist, installs `requirements.txt` with `uv pip install`, then
 opens two new console windows: one running the API
 (`uv run --python .venv python -m uvicorn src.tools.api:app --host 127.0.0.1 --port 8765`)
 and one running the Streamlit UI (`uv run --python .venv streamlit run src\tools\ui.py`).
-Close those windows to stop them — `run.cmd` has no separate stop command.
+Close those windows to stop them; `run.cmd` has no separate stop command.
 
 Individual pieces, run directly (all from the repo root):
 
@@ -80,7 +80,7 @@ Environment variables read by `src/tools/providers.py`:
 
 | Variable | Read by | Required for |
 |---|---|---|
-| `OLLAMA_HOST` | `OllamaProvider` | Optional — defaults to `http://localhost:11434` if unset |
+| `OLLAMA_HOST` | `OllamaProvider` | Optional; defaults to `http://localhost:11434` if unset |
 | `OPENAI_BASE_URL` | `OpenAICompatibleProvider` | Required to use `--provider openai` |
 | `OPENAI_API_KEY` | `OpenAICompatibleProvider` | Required to use `--provider openai` |
 | `AGNESAI_API_KEY` | `AgnesProvider` | Required to use `--provider agnes` |
@@ -93,10 +93,10 @@ variable: <name>")` when that provider is constructed (`_require_env` in
 
 Config files:
 
-- `.streamlit/config.toml` — Streamlit `[server]` (`port = 7018`) and
+- `.streamlit/config.toml`; Streamlit `[server]` (`port = 7018`) and
   `[theme]` (a fixed dark theme; no light variant is defined, so the app
   cannot be switched to light mode from the UI).
-- `pytest.ini` — `pythonpath = src`, `testpaths = tests`.
+- `pytest.ini`; `pythonpath = src`, `testpaths = tests`.
 
 ## Repo map
 
@@ -129,7 +129,7 @@ uv run --python .venv pytest
 ```
 
 21 tests across 6 files in `tests/`, all currently passing. None of them
-make a real network call to any LLM provider — `tests/test_loop.py` and
+make a real network call to any LLM provider; `tests/test_loop.py` and
 `tests/test_api.py` use an in-process fake provider, and `tests/test_api.py`
 exercises the FastAPI app via `fastapi.testclient.TestClient` rather than a
 bound socket. `tests/test_executor.py` includes a live timeout test (a

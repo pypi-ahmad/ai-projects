@@ -11,7 +11,7 @@ uv run python -m obs.api [--host 127.0.0.1] [--port 8000]
 GET endpoints are always open. POST endpoints require the `X-Admin-Token`
 header only if `OBS_ADMIN_TOKEN` is set in the environment; otherwise they're
 open too (`src/obs/api/auth.py`). The token is defense in depth, not the
-primary boundary — that's the `127.0.0.1` bind.
+primary boundary; that's the `127.0.0.1` bind.
 
 ## Endpoints
 
@@ -26,7 +26,7 @@ primary boundary — that's the `127.0.0.1` bind.
 
 ## Exporters
 
-Registered on startup (FastAPI `lifespan`), not at import time — importing
+Registered on startup (FastAPI `lifespan`), not at import time; importing
 `obs.api.app` has no filesystem side effects. Uses
 `obs.export.register_default_exporters()` (JSONL + SQLite), same as any
 other entry point.

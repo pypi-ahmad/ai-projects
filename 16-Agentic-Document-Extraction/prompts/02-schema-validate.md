@@ -1,4 +1,4 @@
-# Phase 2 — Schema and validation
+# Phase 2; Schema and validation
 
 **Implement** the Pydantic schemas and the arithmetic validator. No OpenAI calls, no graph wiring in this phase.
 
@@ -40,8 +40,8 @@ class ValidationReport(BaseModel):
 ```
 
 **Functions:**
-- `validate_invoice(inv: Invoice) -> ValidationReport` — an invoice with empty `line_items` is never `ok`; never mutate the input or its values.
-- `merge_line_item(inv, index, item)` — used later for crop-based updates.
+- `validate_invoice(inv: Invoice) -> ValidationReport`; an invoice with empty `line_items` is never `ok`; never mutate the input or its values.
+- `merge_line_item(inv, index, item)`; used later for crop-based updates.
 
 **Tests** (`tests/test_validate.py`): a passing invoice; a tax mismatch; a line whose `amount != quantity * unit_price`; an empty-`line_items` invoice.
 

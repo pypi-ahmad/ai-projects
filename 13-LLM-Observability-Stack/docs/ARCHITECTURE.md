@@ -2,7 +2,7 @@
 
 Single process per service (one FastAPI process, one Streamlit process),
 communicating over local HTTP. No message queue, no separate worker
-process, no database server — SQLite and flat files on the local disk.
+process, no database server; SQLite and flat files on the local disk.
 
 ## Data flow
 
@@ -41,7 +41,7 @@ flowchart TD
 
 Both exporters run independently: `_run_exporters` (`src/obs/trace/tracer.py`)
 wraps each registered exporter call in its own `try/except`, so one
-exporter failing does not stop the other or re-raise to the caller — it
+exporter failing does not stop the other or re-raise to the caller; it
 only logs (`logging.getLogger(__name__).warning(...)`).
 
 ## Main types and where they live
@@ -58,15 +58,15 @@ only logs (`logging.getLogger(__name__).warning(...)`).
 Module-level mutable state (all in-process, not persisted, reset by
 restarting the process):
 
-- `_current_span`, `_current_trace` — `contextvars.ContextVar`s in
+- `_current_span`, `_current_trace`; `contextvars.ContextVar`s in
   `src/obs/trace/tracer.py`, used so a nested `Tracer.start`/`span.child`
   call finds its parent without the caller threading a span object through
   every function call.
-- `_finished_traces` — plain list in `src/obs/trace/tracer.py`, all traces
+- `_finished_traces`; plain list in `src/obs/trace/tracer.py`, all traces
   finished in this process.
-- `_exporters` — plain list of callables in `src/obs/trace/tracer.py`;
+- `_exporters`; plain list of callables in `src/obs/trace/tracer.py`;
   empty until something calls `register_exporter`/`register_default_exporters`.
-- `_cache` — `src/obs/metrics/pricing.py`, the loaded price table, lazily
+- `_cache`; `src/obs/metrics/pricing.py`, the loaded price table, lazily
   populated on first `estimate_cost` call and never invalidated except by
   `clear_prices_cache()` (used in tests).
 
@@ -86,7 +86,7 @@ restarting the process):
 
 Exactly one: `http://localhost:11434`, Ollama's HTTP API
 (`src/obs/providers/ollama.py`, `POST /api/chat`). Nothing else in this
-codebase makes an outbound network call — the FastAPI app is a server, not
+codebase makes an outbound network call; the FastAPI app is a server, not
 a caller of anything external, and the Streamlit app only calls the local
 FastAPI app.
 

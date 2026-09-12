@@ -1,7 +1,7 @@
 # Reporting a Security Incident
 
-If you suspect a security breach -- a phishing email that was clicked, a lost company laptop,
-or unusual account activity -- report it immediately to security@ and do not wait for your
+If you suspect a security breach; a phishing email that was clicked, a lost company laptop,
+or unusual account activity; report it immediately to security@ and do not wait for your
 manager's availability. Speed matters more than certainty; a false alarm costs far less than
 a delayed real one.
 

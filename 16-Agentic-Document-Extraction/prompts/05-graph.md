@@ -1,16 +1,16 @@
-# Phase 5 — LangGraph wiring
+# Phase 5; LangGraph wiring
 
 **Implement** the LangGraph state machine wiring `src/extract.py` and `src/validate.py` together.
 
 **State fields:** `image_path`, `doc_sha`, `base64_image`, `mime`, `extracted_data`, `regions`, `validation_error`, `report`, `retry_count`, `max_retries`, `cropped_this_iter`, `status`, `human_override`.
 
 **Nodes:**
-- `preprocess` — sets `retry_count = 0` only on the very first visit; never resets it on a later visit.
+- `preprocess`; sets `retry_count = 0` only on the very first visit; never resets it on a later visit.
 - `extract`
-- `validate` — uses `src.validate`; on failure, increments `retry_count` and sets `validation_error` to a string describing the failure.
-- `maybe_crop` — if the report isn't ok and `cropped_this_iter` is false: call `extract_regions`; if any region is cropable, `crop_and_extract`, merge the result into the invoice, and set `cropped_this_iter = True`.
-- `commit` — write `data/committed/<doc_sha>.json` plus an audit line.
-- `review` — write `data/review/<doc_sha>.json` (invoice plus the last report) plus an audit line.
+- `validate`; uses `src.validate`; on failure, increments `retry_count` and sets `validation_error` to a string describing the failure.
+- `maybe_crop`; if the report isn't ok and `cropped_this_iter` is false: call `extract_regions`; if any region is cropable, `crop_and_extract`, merge the result into the invoice, and set `cropped_this_iter = True`.
+- `commit`; write `data/committed/<doc_sha>.json` plus an audit line.
+- `review`; write `data/review/<doc_sha>.json` (invoice plus the last report) plus an audit line.
 
 **Routing from `validate`:**
 1. `ok` → `commit`.

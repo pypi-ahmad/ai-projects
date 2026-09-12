@@ -1,4 +1,4 @@
-# Prompt evaluation — September 12, 2026
+# Prompt evaluation; September 12, 2026
 
 **Decision: keep the baseline layout prompt.** Both revised layout prompts
 improved form segmentation and reference token overlap but introduced incorrect
@@ -15,9 +15,9 @@ The layout candidates and every captured result remain available for review.
 | Document | Pages |
 | --- | --- |
 | Masked BadgeCare Plus_1 | 1 |
-| Masked_Amerigroup_RealSolutions_1 | 1–2 |
+| Masked_Amerigroup_RealSolutions_1 | 1 to 2 |
 | Masked_Amerigroup_RealSolutions_2 | 1 |
-| Masked Amerigroup_1 | 1–2 |
+| Masked Amerigroup_1 | 1 to 2 |
 
 There were 17 page invocations: six baseline, six candidate, and five corrective.
 BadgeCare page 1 was content-filtered in baseline and candidate, then skipped

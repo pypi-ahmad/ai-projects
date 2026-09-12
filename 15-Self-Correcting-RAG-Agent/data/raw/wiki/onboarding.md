@@ -9,4 +9,4 @@ access to your team's shared drive, and set up direct deposit in the payroll sys
 also schedule a buddy for your first two weeks to answer day-to-day questions.
 
 If your laptop has not arrived by your start date, contact the IT helpdesk directly rather than
-waiting -- provisioning delays are common around hiring pushes.
+waiting; provisioning delays are common around hiring pushes.

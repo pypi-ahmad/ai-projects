@@ -1,7 +1,7 @@
 # Regions and cropping (dormant)
 
 **Status: not wired into the active graph.** `maybe_crop` isn't a node in
-`src/graph.py` anymore — see
+`src/graph.py` anymore; see
 [docs/ARCHITECTURE.md](ARCHITECTURE.md#dormant-the-invoice-extractionvalidation-graph).
 The schema and trigger rule below describe `src/regions.py` and the cropping
 functions in `src/extract.py` as they still exist on disk, for whoever
@@ -19,10 +19,10 @@ class Region(BaseModel):
 ```
 
 `bbox_xyxy` is normalized to the image's own width/height so it survives the
-resize done in `preprocess` — multiply by `(width, height, width, height)` to
+resize done in `preprocess`; multiply by `(width, height, width, height)` to
 get pixel coordinates for cropping. It's typed as a variable-length tuple
 (with a validator enforcing exactly 4 values) rather than
-`tuple[float, float, float, float]` — see docs/MODEL.md for why.
+`tuple[float, float, float, float]`; see docs/MODEL.md for why.
 
 ## Crop trigger rule
 
@@ -33,7 +33,7 @@ A region is cropped **only if both** hold:
    the current `ValidationReport`.
 
 If the model returns no bounding boxes at all, cropping is skipped entirely
-and the flow falls back to a full-page retry — cropping is a best-effort
+and the flow falls back to a full-page retry; cropping is a best-effort
 accuracy aid, never a required step.
 
 ## Why

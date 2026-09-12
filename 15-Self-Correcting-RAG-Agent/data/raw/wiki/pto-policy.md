@@ -1,7 +1,7 @@
 # Time Off Policy
 
 The company offers unlimited paid time off for all full-time employees. There is no fixed
-number of vacation days accrued per year -- instead, employees are expected to take the time
+number of vacation days accrued per year; instead, employees are expected to take the time
 they need while keeping their team informed and their work covered.
 
 To take time off, submit a request through Workday at least one week in advance for anything

@@ -19,7 +19,7 @@ Implemented in `src/obs/trace/models.py` (Pydantic). Matches this doc.
 | `kind` | `"client"` \| `"internal"` | default `"internal"` |
 | `provider` | str \| None | set via `span.set(provider=...)` |
 | `model` | str \| None | set via `span.set(model=...)` |
-| `ts` | str | wall-clock ISO 8601 UTC, captured at span start (added Phase 3 — `start_ns`/`end_ns` are monotonic, not calendar time, and can't drive daily file rotation or `since` queries) |
+| `ts` | str | wall-clock ISO 8601 UTC, captured at span start (added Phase 3; `start_ns`/`end_ns` are monotonic, not calendar time, and can't drive daily file rotation or `since` queries) |
 | `start_ns` / `end_ns` | int | `time.monotonic_ns()` |
 | `latency_ms` | float \| None | computed on span exit |
 | `status` | `"ok"` \| `"error"` | `"error"` set automatically if the `with` block raises |
@@ -33,7 +33,7 @@ Implemented in `src/obs/trace/models.py` (Pydantic). Matches this doc.
 |---|---|
 | `in_tokens` | int \| None |
 | `out_tokens` | int \| None |
-| `cost_est` | float \| None — filled in at export time from `config/prices.yaml` if not already set (see below) |
+| `cost_est` | float \| None; filled in at export time from `config/prices.yaml` if not already set (see below) |
 | `ttft_ms` | float \| None |
 
 Pricing (`obs.metrics.estimate_cost`): looks up `Span.model` in
@@ -42,7 +42,7 @@ Pricing (`obs.metrics.estimate_cost`): looks up `Span.model` in
 default to 0 (local compute), so they're `"PRICED"` at zero, not unpriced.
 An already-set `cost_est` is trusted as-is and reported `"PRICED"`. The
 `"PRICED"`/`"UNPRICED"` flag itself is a storage-layer/export concept (an
-extra column in `usage`, an extra key in the JSONL `usage` object) — it is
+extra column in `usage`, an extra key in the JSONL `usage` object); it is
 not a field on the in-memory `Usage` model.
 
 ## Trace
@@ -82,7 +82,7 @@ Implemented in `src/obs/alerts/models.py` (Pydantic). Persisted in
 - JSONL `data/traces/YYYYMMDD.jsonl`: one line per span (flattened, same
   fields as above), rotated by the UTC date in the span's `ts`.
 - Both are registered exporters (`obs.export.register_default_exporters()`)
-  — not automatic on import. Each exporter failure is logged and does not
+ ; not automatic on import. Each exporter failure is logged and does not
   stop the other (`obs.trace.tracer`'s per-exporter try/except).
 - Reads: `obs.export.get_trace(trace_id)` reconstructs a full `Trace`
   (spans + usage) from SQLite. `obs.export.query(route=, model=, since=,

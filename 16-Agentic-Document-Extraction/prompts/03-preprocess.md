@@ -1,10 +1,10 @@
-# Phase 3 — Preprocess and fixtures
+# Phase 3; Preprocess and fixtures
 
 **Implement** `preprocess(path) -> {doc_sha256, mime, base64, width, height, pages: 1}`. No OpenAI calls in this phase.
 
 **Requirements:**
 - Accept `png`, `jpg`, `jpeg`, `webp`, `tiff`.
-- Accept PDF, page 1 only. Look up `pypdfium2` (or another library that pip-installs cleanly on native Windows) — no Poppler, no Docker.
+- Accept PDF, page 1 only. Look up `pypdfium2` (or another library that pip-installs cleanly on native Windows); no Poppler, no Docker.
 - Cap the long edge at 1600px with Pillow.
 - An optional contrast-enhancement flag, default off.
 

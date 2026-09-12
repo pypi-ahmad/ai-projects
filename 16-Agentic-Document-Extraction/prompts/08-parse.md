@@ -1,4 +1,4 @@
-# Phase 8 — Layout parsing
+# Phase 8; Layout parsing
 
 **Implement** `src/parse.py` and its schemas. Do not change the invoice commit rules in this phase.
 
@@ -30,7 +30,7 @@ class ParseResult(BaseModel):
 ```
 
 **Requirements:**
-- For every page image, reuse `preprocess`; for a PDF, render every page (not just page 1) — look up `pypdfium2`'s page-loop API rather than assuming one.
+- For every page image, reuse `preprocess`; for a PDF, render every page (not just page 1); look up `pypdfium2`'s page-loop API rather than assuming one.
 - Call the model with `with_structured_output(ParsePage)` (or a wrapper returning that page's blocks). Prompt it to identify visual regions in reading order, return tables as 2D arrays, normalize boxes to the image it sees, and omit `bbox` when it isn't confident of one.
 - Cap the number of pages parsed (config, default 10) so a large document can't blow up cost.
 - Save the result to `data/parse/<doc_sha>.json`.
@@ -39,4 +39,4 @@ class ParseResult(BaseModel):
 
 **CLI:** `python -m src.parse --path tests/fixtures/invoice.png`
 
-Stop after this phase — no Markdown renderer yet.
+Stop after this phase; no Markdown renderer yet.

@@ -40,31 +40,31 @@ Neither service configures a log file. `uv run python -m obs.api` (uvicorn)
 and `uv run streamlit run ...` (Streamlit) both log to the console of
 whichever window is running them. `src/obs/trace/tracer.py` uses Python's
 `logging` module for exporter failures (`logger.warning("exporter failed",
-exc_info=True)`) — this also goes to the console, not a file, since nothing
+exc_info=True)`); this also goes to the console, not a file, since nothing
 in the tree calls `logging.basicConfig` with a file handler.
 
 ## Failure modes visible in the code
 
-- **`No data at <path>`** / **`No spans for <day>`** — printed by
+- **`No data at <path>`** / **`No spans for <day>`**; printed by
   `uv run python -m obs.export --day <day> --summary`
   (`src/obs/export/__main__.py`) when `data/obs.db` doesn't exist yet or has
   no rows for that day. Not an error; means nothing has been traced yet
   (for that day).
-- **`Ollama request to <base_url> failed: <exc>`** — raised as a
+- **`Ollama request to <base_url> failed: <exc>`**; raised as a
   `RuntimeError` by `src/obs/providers/ollama.py` when the local Ollama
   server can't be reached; surfaces through `POST /v1/demo/complete` as an
   HTTP `502` with that text in the response body.
-- **`missing or invalid X-Admin-Token`** — HTTP `401` from any POST
+- **`missing or invalid X-Admin-Token`**; HTTP `401` from any POST
   endpoint when `OBS_ADMIN_TOKEN` is set in the environment but the request
   either omits `X-Admin-Token` or sends the wrong value
   (`src/obs/api/auth.py`).
-- **`trace not found` / `alert not found`** — HTTP `404` from the relevant
+- **`trace not found` / `alert not found`**; HTTP `404` from the relevant
   GET/POST-by-id endpoints when the id doesn't exist.
-- **`trace_id already exists`** — HTTP `409` from `POST /v1/ingest` if the
+- **`trace_id already exists`**; HTTP `409` from `POST /v1/ingest` if the
   submitted `trace_id` is already in `data/obs.db`.
-- **Port already bound** — `uv run python -m obs.api` will fail to start if
+- **Port already bound**; `uv run python -m obs.api` will fail to start if
   something else is already using the requested port (default `8000`), or
   if the OS itself blocks binding to it (observed once in this environment
-  as a Windows `WinError 10013` on port `8000`, unrelated to this code —
+  as a Windows `WinError 10013` on port `8000`, unrelated to this code ;
   resolved by picking a different `--port`). Streamlit will similarly fail
   on a busy `--server.port`.

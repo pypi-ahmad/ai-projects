@@ -1,7 +1,7 @@
 # Model
 
 - Models: `gpt-5.6-terra` (default) and `gpt-5.6-luna`, selectable in the sidebar.
-  Both use the existing OpenAI-compatible endpoint — this is not
+  Both use the existing OpenAI-compatible endpoint; this is not
   necessarily a model OpenAI itself hosts; `OPENAI_BASE_URL` is expected to
   point at the gateway serving these models.
 - Modality: image in, structured JSON out. One `HumanMessage` per call with
@@ -15,7 +15,7 @@
 
 The active graph only ever sends the `ParsePage` schema (layout parsing).
 `Invoice`/`Region`/the regions wrapper are shaped by the same strict-mode
-constraints described below but aren't currently sent to the model —
+constraints described below but aren't currently sent to the model ;
 extraction/validation is dormant, see
 [docs/ARCHITECTURE.md](ARCHITECTURE.md#dormant-the-invoice-extractionvalidation-graph).
 
@@ -43,7 +43,7 @@ remains unknown, not a claim that a failed call was free.
 lists image input, Chat Completions, and structured outputs. The configured
 gateway's compatibility must be verified separately.
 
-## Reasoning effort — a documented uncertainty
+## Reasoning effort; a documented uncertainty
 
 Luna always uses `reasoning_effort="high"`. Terra retains the
 `REASONING_EFFORT` environment setting described below.
@@ -51,7 +51,7 @@ Luna always uses `reasoning_effort="high"`. Terra retains the
 The installed `langchain-openai==1.6.2` declares `reasoning_effort: str | None`
 as a genuine top-level field on `ChatOpenAI` (verified locally by
 constructing `ChatOpenAI(..., reasoning_effort="medium")` and inspecting
-`ChatOpenAI.model_fields`) — it is sent as a normal Chat Completions
+`ChatOpenAI.model_fields`); it is sent as a normal Chat Completions
 parameter, not routed through OpenAI's separate Responses API. That's a
 different, older mechanism (`ChatOpenAI(reasoning={"effort": ...},
 output_version="responses/v1")`) that this project does not use.
@@ -69,11 +69,11 @@ which enforces a stricter subset of JSON Schema than Pydantic emits by
 default:
 
 1. **Every property must appear in `required`**, even ones that are
-   conceptually optional — those must be nullable types instead of relying
+   conceptually optional; those must be nullable types instead of relying
    on a Python default. A Pydantic field like `vendor: str | None = None`
    generates a schema where `vendor` is *absent* from `required` (because it
    has a default), which strict mode rejects. The fix: drop the `= None`
-   default so the field is `str | None` — required as a JSON key, but its
+   default so the field is `str | None`; required as a JSON key, but its
    *value* can still be `null`. `Invoice.vendor/invoice_date/currency`,
    `Region.reason`, and `ParseBlock.conf/table` all follow this pattern now.
 2. **Fixed-length tuple validation (`prefixItems`) isn't supported.**
@@ -82,11 +82,11 @@ default:
    `prefixItems`/`minItems`/`maxItems`, which strict mode also rejects. The
    fix: `tuple[float, ...]` (variable-length) generates a plain
    `{"type": "array", "items": {"type": "number"}}` schema instead, with a
-   `field_validator` enforcing exactly 4 values at the Python level — same
+   `field_validator` enforcing exactly 4 values at the Python level; same
    guarantee, OpenAI-compatible schema shape.
 
-Every schema actually sent to the model (`Invoice`, `ParsePage` — which
-nests `ParseBlock`/`BBox` — and the regions wrapper schema) was re-checked
+Every schema actually sent to the model (`Invoice`, `ParsePage`; which
+nests `ParseBlock`/`BBox`; and the regions wrapper schema) was re-checked
 after this fix: every property required, no `prefixItems`/`minItems`/
 `maxItems` anywhere in the tree, including nested `$defs`.
 
@@ -119,8 +119,8 @@ defaults for transient HTTP/transport failures.
 ## Structured output ≠ math correctness
 
 Strict JSON schema plus Pydantic validation checks the *shape* of a
-response — for the active `ParsePage` schema, that its blocks have the
-right field types — and says nothing about whether numbers agree with each
+response; for the active `ParsePage` schema, that its blocks have the
+right field types; and says nothing about whether numbers agree with each
 other. For the dormant `Invoice` schema, that check would have been
 `src/validate.py`'s job entirely, run independently of however well-formed
 the model's output was. It doesn't run today: the active graph never

@@ -9,4 +9,4 @@ fares and priority boarding when booked through Concur directly rather than an o
 Hotel bookings above the nightly rate cap require manager approval before the trip.
 
 Keep all receipts from the trip even though Concur pulls itemized folios automatically for
-approved hotel chains -- the automatic pull occasionally misses incidental charges.
+approved hotel chains; the automatic pull occasionally misses incidental charges.

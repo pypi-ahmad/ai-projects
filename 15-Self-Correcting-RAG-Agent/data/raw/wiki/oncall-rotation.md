@@ -8,5 +8,5 @@ If an alert is not acknowledged within fifteen minutes, PagerDuty automatically 
 the secondary on-call engineer, and after another fifteen minutes, to the engineering manager.
 Repeated missed pages are reviewed in the next team retro, not treated as a disciplinary matter.
 
-Swapping on-call shifts is allowed with a teammate's agreement -- just update the PagerDuty
+Swapping on-call shifts is allowed with a teammate's agreement; just update the PagerDuty
 schedule so alerts route correctly.

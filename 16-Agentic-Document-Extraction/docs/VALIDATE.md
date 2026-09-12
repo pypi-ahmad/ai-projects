@@ -1,7 +1,7 @@
 # Validation rules (dormant)
 
 **Status: not wired into the active graph.** `src/validate.py` is intact and
-tested, but `src/graph.py` doesn't call it — the active graph is just
+tested, but `src/graph.py` doesn't call it; the active graph is just
 `preprocess -> parse`. See
 [docs/ARCHITECTURE.md](ARCHITECTURE.md#dormant-the-invoice-extractionvalidation-graph)
 for why, and [docs/COMPLIANCE.md](COMPLIANCE.md) for what actually runs
@@ -26,7 +26,7 @@ to the report; `ValidationReport.ok` is `True` only if every check passes.
 ## Exercising this directly
 
 `tests/fixtures/make_invoice_png.py` generates `invoice.png` with numbers
-matching `good_invoice.json` — a synthetic invoice that passes every check
+matching `good_invoice.json`; a synthetic invoice that passes every check
 above, for exercising this validator (and the rest of the dormant path)
 directly via its tests, since there's no UI route to it today. The same
 script's `invoice_distorted.png` was meant to exercise a retry path in the
@@ -36,7 +36,7 @@ dormant extract/validate cycle, but no currently-listed test file loads it.
 
 - It does not correct a wrong number. If `amount` disagrees with
   `quantity * unit_price`, that's a validation failure to route back to the
-  model (or a human) — Python never edits the value to make the math work.
+  model (or a human); Python never edits the value to make the math work.
   See [docs/COMPLIANCE.md](docs/COMPLIANCE.md).
-- It does not check the number formats, currency codes, or vendor identity —
+- It does not check the number formats, currency codes, or vendor identity ;
   arithmetic only.

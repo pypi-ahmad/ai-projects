@@ -18,14 +18,14 @@ flowchart TD
 
 All of this is orchestrated by `agent/loop.py:run()`. A second entry point,
 `agent/loop.py:run_safe()`, wraps `run()` and converts any exception into an
-`AgentResult(answer=None, reason=...)` instead of propagating it -- the Streamlit UI
+`AgentResult(answer=None, reason=...)` instead of propagating it; the Streamlit UI
 (`ui/app.py`) and the eval runner (`eval/pipeline.py`) both call `run_safe()`, not `run()`,
 for that reason.
 
 `critique()`'s own `decision` field is a model-proposed recommendation.
 `agent/critique.py:enforce_decision()` recomputes the actual decision in code from the
 critique's `grounded` score, whether any chunk was retrieved, remaining iterations, and
-`LoopPolicy.web_enabled` -- see `docs/LOOP.md` for the exact table.
+`LoopPolicy.web_enabled`; see `docs/LOOP.md` for the exact table.
 
 ## Main types and where they live
 
@@ -43,10 +43,10 @@ critique's `grounded` score, whether any chunk was retrieved, remaining iteratio
 | `Settings` | `config.py` | env-backed configuration (`pydantic-settings`) |
 
 On-disk state:
-- `data/indexes/qdrant/` -- a single Qdrant local-mode collection named `chunks`
+- `data/indexes/qdrant/`; a single Qdrant local-mode collection named `chunks`
   (`index/vector_store.py:COLLECTION_NAME`), holding dense vectors and a payload
   (`text`, `source_path`, `page`) per point.
-- `data/indexes/bm25/` -- `bm25s`'s saved lexical index files
+- `data/indexes/bm25/`; `bm25s`'s saved lexical index files
   (`index/lexical_store.py:BM25_DIRNAME`).
 - Nothing else persists. There is no other database, and no session state beyond a Streamlit
   rerun: `ui/app.py` re-reads the index and calls `run_safe()` fresh on every question.

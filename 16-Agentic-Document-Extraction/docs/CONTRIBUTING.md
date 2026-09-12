@@ -1,7 +1,7 @@
 # Contributing
 
 This checkout has no `.git` directory and no CI configuration (`.github/` is
-absent) — there is no branch, PR, or automated-check policy in the tree to
+absent); there is no branch, PR, or automated-check policy in the tree to
 document. The notes below are what's actually observable from the code and
 test suite, not an invented workflow.
 
@@ -17,11 +17,11 @@ uv pip install --python .venv\Scripts\python.exe pytest
 imported throughout `tests/` but isn't listed in `requirements.txt`.
 `openai` is also imported directly (`src/extract.py`,
 `scripts/evaluate_prompts.py`) but only arrives transitively via
-`langchain-openai` — it has no pin of its own. See
+`langchain-openai`; it has no pin of its own. See
 [docs/TECHNICAL.md](TECHNICAL.md) for the full stack list.
 
 `run.cmd` manages its own `.venv` independently (see
-[docs/RUNBOOK.md](RUNBOOK.md)) — the manual venv above is only needed if
+[docs/RUNBOOK.md](RUNBOOK.md)); the manual venv above is only needed if
 you want to run tests or tools outside of `run.cmd`.
 
 ## Running tests
@@ -30,7 +30,7 @@ you want to run tests or tools outside of `run.cmd`.
 .venv\Scripts\python.exe -m pytest
 ```
 
-90 tests, no live API key needed — anything touching `_build_llm` mocks or
+90 tests, no live API key needed; anything touching `_build_llm` mocks or
 monkeypatches around it (see e.g. `tests/fake_llm.py`,
 `tests/test_extract.py`). A change should not be considered done if it
 makes previously-passing tests fail. There's no coverage threshold or lint
@@ -41,14 +41,14 @@ gate configured anywhere in the repo to also satisfy.
 - **Unwire, don't delete, code that no longer fits.** The invoice
   extraction/validation graph was disconnected from `build_graph()` rather
   than removed, specifically so its tests keep running and its plumbing
-  stays available for reuse — see
+  stays available for reuse; see
   [docs/ADR-0001-UNWIRE-INVOICE-PIPELINE.md](ADR-0001-UNWIRE-INVOICE-PIPELINE.md).
   If you're changing what's active vs. dormant, write or update an ADR the
   same way.
 - **Docs say what's active vs. dormant, explicitly, every time.** Every doc
   in this set calls out when it's describing code that isn't reachable from
   the active graph today (grep for "dormant" and "not wired" across
-  `docs/`). Keep that distinction when you edit these files — a doc that
+  `docs/`). Keep that distinction when you edit these files; a doc that
   reads as a guarantee for code that isn't actually running is treated as a
   compliance-relevant bug here, not a style nit (see
   [docs/COMPLIANCE.md](COMPLIANCE.md)).
@@ -70,5 +70,5 @@ Start from [docs/ARCHITECTURE.md](ARCHITECTURE.md) for the active/dormant
 graph shape, then [docs/TECHNICAL.md](TECHNICAL.md) for invariants and
 persistence paths. `docs/MODEL.md` has the strict-`json_schema` shaping
 rules that constrain how any `src/schema.py` model sent to the LLM can be
-written — read it before adding or changing a field on `Invoice`,
+written; read it before adding or changing a field on `Invoice`,
 `ParseBlock`, `ParsePage`, or `Region`.

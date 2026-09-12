@@ -4,7 +4,7 @@ Records traces (prompts, tokens, latency, cost) for LLM calls and evaluates
 anomaly-detection rules against them. Storage is SQLite plus daily JSONL
 files on the local filesystem; a FastAPI service exposes reads/writes over
 HTTP, and a Streamlit app is a thin HTTP client of that service. It is a
-single-process, single-machine tool — not a distributed metrics warehouse.
+single-process, single-machine tool; not a distributed metrics warehouse.
 It does not call any LLM provider itself, except for one optional demo path
 that calls a local Ollama server.
 
@@ -15,7 +15,7 @@ no `Dockerfile`).
 
 - Python `>=3.13` (`pyproject.toml`); this environment has `3.14.7` pinned
   in `.python-version`.
-- [`uv`](https://docs.astral.sh/uv/) for dependency management — the project
+- [`uv`](https://docs.astral.sh/uv/) for dependency management; the project
   is built with `uv_build` (`pyproject.toml`).
 - `run.cmd` is a Windows batch script (uses `start`, `cmd /k`). The
   underlying Python commands it runs (`uv run python -m obs.api`,
@@ -39,7 +39,7 @@ run.cmd
 ```
 
 Reads `run.cmd` verbatim: runs `uv sync --all-groups`, then opens two
-separate console windows — one running `uv run python -m obs.api` (FastAPI,
+separate console windows; one running `uv run python -m obs.api` (FastAPI,
 binds `127.0.0.1:8000`), one running
 `uv run streamlit run src\obs\ui\app.py --server.port 7017` (binds
 `127.0.0.1:7017`). Closing a window stops that service; there is no
@@ -52,7 +52,7 @@ uv run python -m obs.api --host 127.0.0.1 --port 8000
 uv run streamlit run src/obs/ui/app.py --server.port 7017
 ```
 
-Optional, before or after starting the services — seed 30 synthetic traces
+Optional, before or after starting the services; seed 30 synthetic traces
 so the UI/API have something to show:
 
 ```
@@ -79,14 +79,14 @@ usage in `src/`; none are read in `scripts/`):
 
 Config files read by the code:
 
-- `config/alerts.yaml` — alert rule thresholds (`src/obs/alerts/config.py`).
+- `config/alerts.yaml`; alert rule thresholds (`src/obs/alerts/config.py`).
   If missing, code falls back to built-in defaults.
-- `config/prices.yaml` — per-model USD/1000-token rates
+- `config/prices.yaml`; per-model USD/1000-token rates
   (`src/obs/metrics/pricing.py`). If missing, every model is treated as
   unpriced.
-- `.streamlit/config.toml` — currently just `[theme]\nbase = "dark"`.
+- `.streamlit/config.toml`; currently just `[theme]\nbase = "dark"`.
 
-Whether a `.env` or `.env.example` file exists in this repo is **unknown** —
+Whether a `.env` or `.env.example` file exists in this repo is **unknown** ;
 both names are blocked from being read or listed by this environment's own
 permission rules, so this document cannot confirm or deny their presence or
 contents.
@@ -119,15 +119,15 @@ uv run pytest -q
 
 39 tests pass as of this writing. Two of the eight test files
 (`tests/test_redact.py`, `tests/test_storage.py`) import from `obs_legacy`,
-not from `src/obs` — they test the superseded package, not the one the rest
+not from `src/obs`; they test the superseded package, not the one the rest
 of this repo runs. `uv run ruff check .`, `uv run ruff format --check .`,
 and `uv run ty check .` are also used in this repo (see `pyproject.toml`
 for the configured rule set).
 
 ## Ingesting a trace from another project
 
-`POST /v1/ingest` accepts a prebuilt `Trace` JSON — the same shape
-`src/obs/trace/models.py` produces locally (see `docs/SCHEMA.md`) — so
+`POST /v1/ingest` accepts a prebuilt `Trace` JSON; the same shape
+`src/obs/trace/models.py` produces locally (see `docs/SCHEMA.md`); so
 another repo can ship traces here without importing this package. Verified
 against the running API:
 
@@ -156,7 +156,7 @@ curl -X POST http://127.0.0.1:8000/v1/ingest \
   }'
 ```
 
-`trace_id` must not already exist — ingesting a duplicate returns `409`.
+`trace_id` must not already exist; ingesting a duplicate returns `409`.
 Add `-H "X-Admin-Token: <value>"` if `OBS_ADMIN_TOKEN` is configured.
 
 ## Known limitations
@@ -180,13 +180,13 @@ Visible directly in the code/config, not aspirational:
 
 ## Docs
 
-- `docs/ARCHITECTURE.md` — data flow and module map
-- `docs/TECHNICAL.md` — stack choices, invariants, error handling, persistence
-- `docs/SCHEMA.md` — Trace/Span/Usage/Alert field reference
-- `docs/ALERTS.md` — alert rules and cooldown behavior
-- `docs/PRIVACY.md` — what's stored raw vs. hashed
-- `docs/API.md` — FastAPI endpoint reference
-- `docs/RUNBOOK.md` — starting/stopping the services, common failures
+- `docs/ARCHITECTURE.md`; data flow and module map
+- `docs/TECHNICAL.md`; stack choices, invariants, error handling, persistence
+- `docs/SCHEMA.md`; Trace/Span/Usage/Alert field reference
+- `docs/ALERTS.md`; alert rules and cooldown behavior
+- `docs/PRIVACY.md`; what's stored raw vs. hashed
+- `docs/API.md`; FastAPI endpoint reference
+- `docs/RUNBOOK.md`; starting/stopping the services, common failures
 
 No `docs/CONTRIBUTING.md`: this repo has no `.git/`, no CI configuration,
 and no existing branch/PR/test-gate conventions to document, so there is

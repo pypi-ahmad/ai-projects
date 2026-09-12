@@ -1,4 +1,4 @@
-# Phase 6 — Streamlit UI and run.cmd
+# Phase 6; Streamlit UI and run.cmd
 
 **Implement** `src/ui/app.py` and the real `run.cmd`.
 
@@ -18,6 +18,6 @@ if not exist .env copy .env.example .env
 python -m streamlit run src/ui/app.py
 ```
 
-**README:** add a 30-second path — generate the fixture PNG, set the API key, run `run.cmd`, upload the fixture.
+**README:** add a 30-second path; generate the fixture PNG, set the API key, run `run.cmd`, upload the fixture.
 
 Stop after this phase.

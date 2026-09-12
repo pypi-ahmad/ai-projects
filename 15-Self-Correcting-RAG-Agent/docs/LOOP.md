@@ -6,10 +6,10 @@
 |---|---|---|
 | `max_iters` | `2` | Total retrieval attempts per query: 1 initial + 1 rewrite-retry. |
 | `confidence_threshold` | `0.6` | The critique's `grounded` score (below) at or above which retrieval is treated as sufficient. |
-| `web_enabled` | `False` | Whether web fallback may run. Only ever `True` if `SEARCH_API_KEY` was configured at startup -- see `Settings.resolve_web_enabled()`, which force-disables this regardless of what was requested when the key is unset. |
+| `web_enabled` | `False` | Whether web fallback may run. Only ever `True` if `SEARCH_API_KEY` was configured at startup; see `Settings.resolve_web_enabled()`, which force-disables this regardless of what was requested when the key is unset. |
 | `citation_fail_closed` | `False` | `False`: strip an illegal `[S#]`/`[W#]` citation and lower confidence. `True`: abstain outright instead of returning a partially-cleaned answer. |
 
-Values are tunable, not hardcoded law -- change them if evaluation shows a better setting.
+Values are tunable, not hardcoded law; change them if evaluation shows a better setting.
 
 ## Critique score (`agent.schemas.CritiqueResult`)
 
@@ -20,13 +20,13 @@ The critique model's response is validated against this schema:
 ```
 
 `grounded` estimates whether the retrieved chunks support a correct answer to the
-(rewritten) query -- not answer quality, and never derived from the generator's own
+(rewritten) query; not answer quality, and never derived from the generator's own
 certainty, which would conflate "retrieval found it" with "the model feels confident," the
 exact failure mode this agent exists to avoid. `coverage` is a separate signal: how much of
 the query's information need the context addresses, independent of whether it's grounded.
 `missing` feeds back into the next `rewrite()` call as hints on a retry.
 
-The model's own `decision` is a recommendation only, not the source of truth -- see below.
+The model's own `decision` is a recommendation only, not the source of truth; see below.
 
 ## Decision table (`agent.critique.enforce_decision`)
 
@@ -41,7 +41,7 @@ retrieved (a high score with zero chunks is not sufficient).
 | false | false | false | `abstain` |
 
 `enforce_decision` recomputes this table in code from the critique's scores and the policy,
-every time -- it does not trust the model's proposed `decision`. When they disagree, code
+every time; it does not trust the model's proposed `decision`. When they disagree, code
 overrides the model and appends why to `rationale` (visible in the trace and the UI), e.g.
 `"overrode model's decision 'answer' -> 'retry' (grounded=0.42, threshold=0.6, ...)"`.
 
@@ -69,4 +69,4 @@ call on its own.
 
 **Web results are best-effort and untrusted.** A search or fetch failure is skipped, not
 treated as a hard error (see `web/fetch.py`); a page that fails to fetch simply isn't cited.
-Fetched text is never executed or followed as instructions -- see `docs/THREAT_NOTES.md`.
+Fetched text is never executed or followed as instructions; see `docs/THREAT_NOTES.md`.
