@@ -8,26 +8,27 @@ one project at a time. The projects are separate examples and do not form one co
 
 ## Project index
 
-Choose a project to read its setup instructions, examples, and limitations.
+Choose a project to see what it teaches, what it needs, and how to start it. Open the linked README for
+the full walkthrough, configuration, and limitations.
 
-| # | Project | What it covers |
-| --- | --- | --- |
-| 1 | [Production RAG Pipeline](1-Production-RAG-Pipeline/README.md) | Document ingestion, hybrid retrieval, reranking, and cited answers. |
-| 2 | [Structured Output Engine](2-Structured-Output-Engine/README.md) | Schema-validated JSON extraction with retries and model-based repair. |
-| 3 | [Context Assembly Service](3-Context-Assembly-Service/README.md) | Packing memory, documents, and tool results into a token budget. |
-| 4 | [LLM Evaluation Harness](4-LLM-Evaluation-Harness/README.md) | Dataset evaluation, deterministic metrics, LLM judging, and regression checks. |
-| 5 | [Semantic Cache Layer](5-Semantic-Cache-Layer/README.md) | Caching query/answer pairs by embedding similarity with embedded Qdrant. |
-| 6 | [Model Routing Gateway](6-Model-Routing-Gateway/README.md) | Routing requests across model cost tiers with retries and usage tracking. |
-| 7 | [Multi-Tenant LLM API](7-Multi-Tenant-LLM-API/README.md) | Tenant authentication, rate limits, token budgets, and provider forwarding. |
-| 8 | [Fine-Tuning Pipeline](8-Fine-Tuning-Pipeline/README.md) | LoRA/QLoRA training on synthetic data and comparison with a prompt-only baseline. |
-| 9 | [Agent Memory System](9-Agent-Memory-System/README.md) | Working, episodic, and semantic memory with compression and budgeted recall. |
-| 10 | [Guardrails Middleware](10-Guardrails-Middleware/README.md) | PII redaction and prompt-injection checks around LLM calls. |
-| 11 | [Streaming Response Infrastructure](11-Streaming-Response-Infrastructure/README.md) | SSE streaming with backpressure, buffered reconnects, and latency metrics. |
-| 12 | [Prompt Versioning and A/B System](12-Prompt-Versioning-and-AB-System/README.md) | Immutable prompt versions, rollback, weighted experiments, and outcome tracking. |
-| 13 | [LLM Observability Stack](13-LLM-Observability-Stack/README.md) | Local traces for latency, token usage, and cost, with alert evaluation. |
-| 14 | [Tool-Calling Framework](14-Tool-Calling-Framework/README.md) | Typed Python tools with argument validation, permission checks, and an LLM calling loop. |
-| 15 | [Self-Correcting RAG Agent](15-Self-Correcting-RAG-Agent/README.md) | Retrieval with query rewriting, critique, retries, web fallback, and abstention. |
-| 16 | [Agentic Document Extraction](16-Agentic-Document-Extraction/README.md) | Vision-model document parsing into Markdown/HTML and annotated PDF/PNG outputs. |
+| # | Project | What it covers | Requirements | Start |
+| --- | --- | --- | --- | --- |
+| 1 | [Production RAG Pipeline](1-Production-RAG-Pipeline/README.md) | Ingests mixed document formats.<br>Combines dense and BM25 retrieval, then reranks the results.<br>Generates answers with citations for review. | Ollama for local embeddings and reranking.<br>Cloud keys are optional. | `.\run.cmd` |
+| 2 | [Structured Output Engine](2-Structured-Output-Engine/README.md) | Extracts JSON from unstructured text.<br>Validates it against a Pydantic schema.<br>Retries or repairs invalid model output. | Ollama for the default generation and repair paths.<br>Cloud credentials are optional. | `.\run.cmd` |
+| 3 | [Context Assembly Service](3-Context-Assembly-Service/README.md) | Accepts memory, document, and tool blocks.<br>Packs them within a token budget.<br>Reports what it kept, compressed, or dropped. | No model service, GPU, or API key for packing.<br>Model-based compression is optional. | `.\run.cmd` |
+| 4 | [LLM Evaluation Harness](4-LLM-Evaluation-Harness/README.md) | Runs models against fixed datasets.<br>Scores answers with deterministic metrics and an optional LLM judge.<br>Checks results against stored baselines. | No live model for frozen fixtures.<br>Live candidates and judges need Ollama or cloud credentials. | `.\run.cmd` |
+| 5 | [Semantic Cache Layer](5-Semantic-Cache-Layer/README.md) | Stores query and answer pairs.<br>Finds reusable answers by embedding similarity.<br>Reports cache hits, misses, scores, and metrics. | Ollama with `qwen3-embedding:0.6b`.<br>Qdrant runs embedded. | `.\run.cmd` |
+| 6 | [Model Routing Gateway](6-Model-Routing-Gateway/README.md) | Selects a model cost tier for each request.<br>Promotes requests after eligible targets fail.<br>Records latency and estimated token cost. | No GPU for routing logic.<br>Live requests need Ollama or cloud credentials. | `.\run.cmd` |
+| 7 | [Multi-Tenant LLM API](7-Multi-Tenant-LLM-API/README.md) | Authenticates requests by tenant.<br>Enforces rate limits and monthly token budgets.<br>Forwards calls and records usage. | Set `ADMIN_TOKEN` for admin operations.<br>Real chat needs Ollama or a cloud provider. | `.\run.cmd` |
+| 8 | [Fine-Tuning Pipeline](8-Fine-Tuning-Pipeline/README.md) | Generates synthetic support-ticket data.<br>Fine-tunes `Qwen/Qwen3.5-0.8B` with LoRA or QLoRA.<br>Compares the adapter with a prompt-only baseline. | NVIDIA CUDA GPU for the documented training path.<br>Ollama or cloud keys for generation and evaluation. | `uv sync`<br>`.\run.cmd`<br>`.\train.cmd` |
+| 9 | [Agent Memory System](9-Agent-Memory-System/README.md) | Stores working, episodic, and semantic memory.<br>Runs eviction, compression, and fact distillation.<br>Returns token-budgeted recall to a caller. | Ollama with the documented embedding and chat models.<br>No cloud credentials. | `.\run.cmd` |
+| 10 | [Guardrails Middleware](10-Guardrails-Middleware/README.md) | Checks text before and after an LLM call.<br>Redacts PII and detects prompt-injection patterns.<br>Returns allow, transform, or block decisions. | No model for rule-based checks.<br>Ollama for the optional local classifier. | `.\run.cmd` |
+| 11 | [Streaming Response Infrastructure](11-Streaming-Response-Infrastructure/README.md) | Streams chat responses over SSE.<br>Handles backpressure and buffered reconnects.<br>Measures time to first token. | No model service for the fake provider.<br>Live providers need their service or credentials. | `.\run.cmd` |
+| 12 | [Prompt Versioning and A/B System](12-Prompt-Versioning-and-AB-System/README.md) | Stores immutable prompt versions.<br>Supports environment pointers, rollback, and sticky experiments.<br>Records outcomes for resolved requests. | No GPU, model service, or API key.<br>`PROMPTREG_ADMIN_TOKEN` is optional. | `.\run.cmd` |
+| 13 | [LLM Observability Stack](13-LLM-Observability-Stack/README.md) | Stores local traces for LLM calls.<br>Tracks latency, token usage, cost, and prompt previews.<br>Evaluates alert rules against recorded traces. | No model service for synthetic traces.<br>Ollama is optional for the traced-completion demo. | `.\run.cmd` |
+| 14 | [Tool-Calling Framework](14-Tool-Calling-Framework/README.md) | Registers typed Python functions as tools.<br>Validates arguments and checks permissions before execution.<br>Runs tool calls through a bounded LLM loop. | No model for manual tool calls.<br>Chat needs Ollama or cloud credentials. | `.\run.cmd` |
+| 15 | [Self-Correcting RAG Agent](15-Self-Correcting-RAG-Agent/README.md) | Rewrites questions and retrieves local evidence.<br>Critiques results before answering or retrying.<br>Can search the web or abstain when evidence is weak. | Ollama for the default models and embeddings.<br>Web fallback needs `SEARCH_API_KEY` and `SEARCH_BASE_URL`. | `.\run.cmd` |
+| 16 | [Agentic Document Extraction](16-Agentic-Document-Extraction/README.md) | Parses document pages with a vision model.<br>Produces layout-aware Markdown and HTML.<br>Creates annotated PDF and PNG outputs for review. | `OPENAI_API_KEY` and access to a configured Terra or Luna model.<br>No Ollama or local GPU. | `.\run.cmd` |
 
 ## Suggested order
 
