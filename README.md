@@ -6,6 +6,29 @@ document parsing. Each numbered folder is self-contained, with its own code, dep
 launcher, and README. You can work through the complete sequence or clone the repository to study and run
 one project at a time. The projects are separate examples and do not form one combined application.
 
+## Project index
+
+Choose a project to read its setup instructions, examples, and limitations.
+
+| # | Project | What it covers |
+| --- | --- | --- |
+| 1 | [Production RAG Pipeline](1-Production-RAG-Pipeline/README.md) | Document ingestion, hybrid retrieval, reranking, and cited answers. |
+| 2 | [Structured Output Engine](2-Structured-Output-Engine/README.md) | Schema-validated JSON extraction with retries and model-based repair. |
+| 3 | [Context Assembly Service](3-Context-Assembly-Service/README.md) | Packing memory, documents, and tool results into a token budget. |
+| 4 | [LLM Evaluation Harness](4-LLM-Evaluation-Harness/README.md) | Dataset evaluation, deterministic metrics, LLM judging, and regression checks. |
+| 5 | [Semantic Cache Layer](5-Semantic-Cache-Layer/README.md) | Caching query/answer pairs by embedding similarity with embedded Qdrant. |
+| 6 | [Model Routing Gateway](6-Model-Routing-Gateway/README.md) | Routing requests across model cost tiers with retries and usage tracking. |
+| 7 | [Multi-Tenant LLM API](7-Multi-Tenant-LLM-API/README.md) | Tenant authentication, rate limits, token budgets, and provider forwarding. |
+| 8 | [Fine-Tuning Pipeline](8-Fine-Tuning-Pipeline/README.md) | LoRA/QLoRA training on synthetic data and comparison with a prompt-only baseline. |
+| 9 | [Agent Memory System](9-Agent-Memory-System/README.md) | Working, episodic, and semantic memory with compression and budgeted recall. |
+| 10 | [Guardrails Middleware](10-Guardrails-Middleware/README.md) | PII redaction and prompt-injection checks around LLM calls. |
+| 11 | [Streaming Response Infrastructure](11-Streaming-Response-Infrastructure/README.md) | SSE streaming with backpressure, buffered reconnects, and latency metrics. |
+| 12 | [Prompt Versioning and A/B System](12-Prompt-Versioning-and-AB-System/README.md) | Immutable prompt versions, rollback, weighted experiments, and outcome tracking. |
+| 13 | [LLM Observability Stack](13-LLM-Observability-Stack/README.md) | Local traces for latency, token usage, and cost, with alert evaluation. |
+| 14 | [Tool-Calling Framework](14-Tool-Calling-Framework/README.md) | Typed Python tools with argument validation, permission checks, and an LLM calling loop. |
+| 15 | [Self-Correcting RAG Agent](15-Self-Correcting-RAG-Agent/README.md) | Retrieval with query rewriting, critique, retries, web fallback, and abstention. |
+| 16 | [Agentic Document Extraction](16-Agentic-Document-Extraction/README.md) | Vision-model document parsing into Markdown/HTML and annotated PDF/PNG outputs. |
+
 ## Suggested order
 
 Follow **1 → 16** to start with RAG, move through the components around an LLM call, and finish with tool
