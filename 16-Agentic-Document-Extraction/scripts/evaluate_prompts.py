@@ -15,11 +15,11 @@ import time
 
 from openai import ContentFilterFinishReasonError
 
-from src.extract import MODEL_NAME, _build_llm, _image_message, _invoke_structured
+from src.llm import MODEL_NAME, _build_llm, _image_message, _invoke_structured
 from src.diagnostics import ExtractionCallError
 from src.parse import MAX_PARALLEL_PAGES
 from src.preprocess import preprocess_pages
-from src.schema import ParsePage
+from src.layout import ParsePage
 
 ROOT = Path(__file__).resolve().parents[1]
 REFERENCES = Path(r"D:\AI\Github\OpenAI-Agentic-Document_extraction\data\GroundTruths")
@@ -86,7 +86,9 @@ def run_page(payload: dict, prompt: str, *, max_completion_tokens: int | None = 
         if reasoning_effort is not None:
             llm.reasoning_effort = reasoning_effort
         llm.root_client = llm.root_client.with_options(max_retries=0, timeout=180)
-        text = prompt.format(page_number=payload["page"], width_px=payload["width"], height_px=payload["height"])
+        text = prompt.format(page_number=payload["page"], total_pages=1,
+                             width_px=payload["width"], height_px=payload["height"],
+                             document_context="")
         page = _invoke_structured(
             llm, ParsePage, [_image_message(text, payload["base64"], payload["mime"])],
             call_name="parse_page", diagnostics=diagnostics,

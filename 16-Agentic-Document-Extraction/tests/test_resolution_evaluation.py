@@ -4,7 +4,7 @@ import json
 import pytest
 
 from scripts import evaluate_resolution as evaluation
-from src.schema import ParsePage
+from src.layout import ParsePage
 
 
 @pytest.fixture

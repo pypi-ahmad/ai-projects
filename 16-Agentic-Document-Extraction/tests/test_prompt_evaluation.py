@@ -17,7 +17,7 @@ import pytest
 
 from scripts import evaluate_prompts as evaluation
 from scripts.evaluate_prompts import SAMPLES, plain_text, score_page
-from src.schema import BBox, ParseBlock, ParsePage
+from src.layout import BBox, ParseBlock, ParsePage
 
 
 def test_live_manifest_is_limited_to_approved_six_pages():

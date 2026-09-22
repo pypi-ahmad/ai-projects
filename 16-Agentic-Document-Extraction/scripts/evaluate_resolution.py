@@ -11,7 +11,7 @@ import time
 from scripts.evaluate_prompts import ROOT, REFERENCES, SAMPLES, run_page, score_page
 from src.models import DEFAULT_MODEL
 from src.preprocess import preprocess_pages
-from src.schema import ParsePage
+from src.layout import ParsePage
 from src.usage import cost_usd
 
 PROFILES = {"baseline": (200, 1600), "candidate": (300, 3200)}
