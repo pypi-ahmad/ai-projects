@@ -1,8 +1,7 @@
 """Loads a source document (raster image or PDF) and turns it into the
 model-ready payload every downstream step consumes: a capped-size PNG,
-base64-encoded, plus its `doc_sha256`. `preprocess` handles page 1 only (used
-by the dormant invoice path); `preprocess_pages` is what the active graph
-calls for a page range.
+base64-encoded, plus its `doc_sha256`. `preprocess` handles page 1 for the
+graph bootstrap; `preprocess_pages` renders the selected page range.
 
 Must not emit anything other than "image/png" or silently truncate a range.
 Invalid page ranges are rejected before model calls.

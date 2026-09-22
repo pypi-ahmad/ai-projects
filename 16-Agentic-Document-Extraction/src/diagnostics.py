@@ -8,7 +8,7 @@ that would defeat the point of this module, since `PageDiagnostic` is shown
 directly in the UI (see src/ui/app.py's "API diagnostics" expander) and may
 be persisted in ParseResult JSON.
 
-Next: src/extract.py's `_invoke_structured`, where these fields are
+Next: src/llm.py's `_invoke_structured`, where these fields are
 populated from a real (or mocked) API response.
 """
 

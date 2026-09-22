@@ -1,14 +1,7 @@
-"""Defines and runs the active LangGraph pipeline: `preprocess -> parse ->
-END` (see docs/ARCHITECTURE.md). `build_graph`/`run_graph` are the only
+"""Defines and runs the pipeline: `preprocess -> parse -> END`.
+`build_graph`/`run_graph` are the only
 supported entry points for running a document through this project --
 src/ui/app.py and this module's own `_main` both go through `run_graph`.
-
-Must not: re-add the removed `extract -> validate -> maybe_crop ->
-commit`/`review` nodes to `build_graph()` without re-reading
-docs/ADR-0001-UNWIRE-INVOICE-PIPELINE.md first -- that path assumed an
-invoice's arithmetic could be checked, which doesn't hold for prior-auth
-documents. The code for it (src/extract.py, src/validate.py, src/regions.py)
-is intentionally left in place, just unwired.
 
 Next: src/parse.py, where the actual per-page work happens.
 """
@@ -27,17 +20,12 @@ from langgraph.graph import END, START, StateGraph
 from src import usage
 from src.models import DEFAULT_MODEL
 from src.annotate import annotate_document
-from src.markdown import save_markdown_for_doc
+from src.markdown import save_html_for_doc, save_markdown_for_doc
 from src.parse import parse_document
 from src.preprocess import preprocess
-from src.schema import ParseResult
+from src.layout import ParseResult
 
-# Invoice extraction/validation/crop-retry/commit/review was removed from the
-# active graph (real prior-auth documents have no arithmetic to validate --
-# the Invoice schema doesn't fit them). src/extract.py, src/validate.py,
-# src/regions.py, and the Invoice/Region/ValidationReport schemas in
-# src/schema.py are untouched on disk (not deleted, just unwired) for when a
-# replacement schema/validation model is defined. See docs/ARCHITECTURE.md.
+# This graph only parses source pages into grounded layout data and Markdown.
 
 
 class GraphState(TypedDict, total=False):
@@ -58,6 +46,7 @@ class GraphState(TypedDict, total=False):
     token_usage: list[dict]
     parse_json_path: str | None
     markdown_path: str | None
+    html_path: str | None
     annotated_page_paths: list[str]
 
 
@@ -111,6 +100,7 @@ def node_parse(state: GraphState) -> dict:
             }
 
         md_path = save_markdown_for_doc(result, output_dir=state["output_dir"])
+        html_path = save_html_for_doc(result, output_dir=state["output_dir"])
         parse_status = "partial" if parse_error else "ok"
         print(f"[ADE] parse: {parse_status}, {len(result.pages)} page(s) -> {md_path}")
 
@@ -134,6 +124,7 @@ def node_parse(state: GraphState) -> dict:
             "annotated_pdf_path": annotated_pdf_path,
             "annotated_page_paths": annotated_page_paths,
             "markdown_path": str(md_path),
+            "html_path": str(html_path),
             "parse_json_path": str(Path(state["output_dir"]) / f"{result.doc_sha}.json"),
             "status": "parsed_partial" if parse_error else "parsed",
         }

@@ -1,8 +1,8 @@
-"""Active layout-parsing entry point. `parse_document` fans a page range out
-across a bounded thread pool and calls `parse_page` (a thin wrapper over
-src/extract.py's `_invoke_structured`/`ParsePage`) once per page, then writes
+"""Active layout-parsing entry point. `parse_document` processes a page range
+in source order and calls `parse_page` (a thin wrapper over
+src/llm.py's `_invoke_structured`/`ParsePage`) once per page, then writes
 `<output_dir>/<doc_sha>.json` itself -- this is the only unconditionally-called
-consumer of src/extract.py's model-call plumbing in the active graph (see
+consumer of src/llm.py's model-call plumbing in the active graph (see
 src/graph.py).
 
 Must not: let one page's failure abort the others, or let a failure escape
@@ -16,36 +16,42 @@ Next: src/markdown.py, which renders whatever `ParseResult` this produces.
 from __future__ import annotations
 
 import argparse
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections.abc import Callable
 from pathlib import Path
 
 from openai import ContentFilterFinishReasonError
 
-from src.extract import _build_llm, _image_message, _invoke_structured
+from src.llm import _build_llm, _image_message, _invoke_structured
 from src.preprocess import preprocess_pages
 from src.prompts import render_prompt
 from src.models import DEFAULT_MODEL, MODEL_RATES
-from src.schema import ParsePage, ParseResult
+from src.layout import ParsePage, ParseResult
 from src.diagnostics import ExtractionCallError, PageDiagnostic
 
-# Bounds concurrent per-page calls -- each page is an independent
-# single-image request (see docs/ARCHITECTURE.md), so this is a latency win
-# with no batching/accuracy tradeoff. The value 50 matches the concurrency
-# cap used historically in scripts/evaluate_prompts.py's live evaluation
-# runs (docs/PROMPT-EVALUATION.md, docs/PROMPTS.md); whether 50 specifically
-# was chosen for a rate-limit or cost reason beyond that isn't recorded
-# anywhere in this repo.
-MAX_PARALLEL_PAGES = 50
+# Pages are parsed in order so each call can use preceding-page context.
+MAX_PARALLEL_PAGES = 1
+
+
+def _page_context(page: ParsePage) -> str:
+    parts = []
+    for block in page.blocks:
+        if block.type == "table" and block.table:
+            parts.extend(" | ".join(row) for row in block.table)
+        elif block.text:
+            parts.append(block.text)
+    return "\n".join(parts)
+
 
 def parse_page(
     image_b64: str, mime: str, page_number: int, width_px: int, height_px: int,
     *, diagnostics: list[PageDiagnostic] | None = None, model: str = DEFAULT_MODEL,
     usage_entries: list[dict] | None = None,
+    document_context: str = "", total_pages: int = 1,
 ) -> ParsePage:
     llm = _build_llm(model=model)
     text = render_prompt(
-        "parse-page", page_number=page_number, width_px=width_px, height_px=height_px
+        "parse-page", page_number=page_number, total_pages=total_pages,
+        width_px=width_px, height_px=height_px, document_context=document_context,
     )
     result = _invoke_structured(
         llm, ParsePage, [_image_message(text, image_b64, mime)], call_name="parse_page",
@@ -66,10 +72,9 @@ def parse_document(
     """Layout-parse every page in [start_page, end_page] (1-based, inclusive;
     end_page=None means through the last page -- there is no page cap).
 
-    Pages are parsed concurrently (bounded to MAX_PARALLEL_PAGES at a time):
-    each page is an independent single-image call, so this is a latency win
-    with no accuracy tradeoff (unlike batching several pages into one call,
-    which would risk the model conflating content across pages).
+    Pages are parsed sequentially. Each successful page contributes bounded
+    context to the next page so headings and continued structures remain
+    coherent across the document.
     """
     if model not in MODEL_RATES:
         raise ValueError("Unsupported model")
@@ -77,6 +82,8 @@ def parse_document(
     if not pages_payload:
         raise ValueError("Page range contains no pages")
     doc_sha = pages_payload[0]["doc_sha256"]
+
+    context_parts: list[str] = []
 
     def parse_payload(payload: dict) -> tuple[ParsePage | None, PageDiagnostic]:
         diagnostics = []
@@ -90,6 +97,8 @@ def parse_document(
                 diagnostics=diagnostics,
                 model=model,
                 usage_entries=usage_entries,
+                document_context="\n\n".join(context_parts)[-12000:],
+                total_pages=len(pages_payload),
             )
             diagnostic = diagnostics[-1] if diagnostics else PageDiagnostic(outcome="parsed")
             return page, diagnostic.model_copy(update={"page": payload["page"]})
@@ -100,18 +109,17 @@ def parse_document(
         except Exception:
             return None, PageDiagnostic(page=payload["page"], outcome="invalid_response", requested_model=model)
 
-    with ThreadPoolExecutor(max_workers=MAX_PARALLEL_PAGES) as pool:
-        futures = [pool.submit(parse_payload, payload) for payload in pages_payload]
-        outcomes = []
-        successful = 0
-        for future in as_completed(futures):
-            outcome = future.result()
-            outcomes.append(outcome)
-            successful += outcome[0] is not None
-            if on_progress:
-                on_progress({"completed": len(outcomes), "total": len(futures),
-                             "successful": successful, "failed": len(outcomes) - successful})
-    outcomes.sort(key=lambda outcome: outcome[1].page)
+    outcomes = []
+    successful = 0
+    for payload in pages_payload:
+        outcome = parse_payload(payload)
+        outcomes.append(outcome)
+        if outcome[0] is not None:
+            successful += 1
+            context_parts.append(_page_context(outcome[0]))
+        if on_progress:
+            on_progress({"completed": len(outcomes), "total": len(pages_payload),
+                         "successful": successful, "failed": len(outcomes) - successful})
 
     pages = [page for page, _ in outcomes if page is not None]
     content_filtered_pages = [
@@ -133,7 +141,7 @@ def parse_document(
 
 def _main() -> None:
     parser = argparse.ArgumentParser(description="Parse a document's pages into layout blocks.")
-    parser.add_argument("--path", required=True, help="Path to an invoice image or PDF")
+    parser.add_argument("--path", required=True, help="Path to a scanned image or PDF")
     parser.add_argument("--start-page", type=int, default=1)
     parser.add_argument("--end-page", type=int, default=None, help="Omit for through the last page")
     args = parser.parse_args()

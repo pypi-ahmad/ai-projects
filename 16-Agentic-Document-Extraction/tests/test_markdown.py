@@ -11,7 +11,15 @@ import json
 from pathlib import Path
 
 from src.markdown import parse_to_html, parse_to_markdown, render_and_save
-from src.schema import BBox, ParseBlock, ParsePage, ParseResult
+from src.layout import BBox, ParseBlock, ParsePage, ParseResult
+
+
+def test_ragged_model_table_rows_are_padded_without_changing_cells():
+    block = ParseBlock(
+        id="t1", type="table", text="A | B", bbox=None, conf=None,
+        table=[["A", "B"], ["C"]],
+    )
+    assert block.table == [["A", "B"], ["C", ""]]
 
 
 def _sample_result() -> ParseResult:

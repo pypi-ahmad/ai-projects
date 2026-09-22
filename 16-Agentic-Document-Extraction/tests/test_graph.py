@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 
 from src import graph as graph_module
-from src.schema import ParsePage, ParseResult
+from src.layout import ParsePage, ParseResult
 
 FIXTURE_PATH = (Path(__file__).parent / "fixtures" / "invoice.png").resolve()
 
@@ -20,16 +20,22 @@ FIXTURE_PATH = (Path(__file__).parent / "fixtures" / "invoice.png").resolve()
 def test_parse_success_sets_status_and_artifacts(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
-    from src.schema import ParseResult
+    from src.layout import ParseResult
 
     def fake_parse_document(path, start_page=1, end_page=None, **kwargs):
         import hashlib
 
         doc_sha = hashlib.sha256(Path(path).read_bytes()).hexdigest()
-        return ParseResult(
+        result = ParseResult(
             doc_sha=doc_sha,
             pages=[ParsePage(page=1, width_px=900, height_px=620, blocks=[])],
         )
+        output_dir = Path(kwargs["output_dir"])
+        output_dir.mkdir(parents=True, exist_ok=True)
+        (output_dir / f"{doc_sha}.json").write_text(
+            result.model_dump_json(indent=2), encoding="utf-8"
+        )
+        return result
 
     monkeypatch.setattr(graph_module, "parse_document", fake_parse_document)
 
@@ -38,6 +44,9 @@ def test_parse_success_sets_status_and_artifacts(tmp_path, monkeypatch):
     assert result["status"] == "parsed"
     assert result["parse_error"] is None
     assert result["markdown"] is not None
+    assert Path(result["markdown_path"]).exists()
+    assert Path(result["html_path"]).exists()
+    assert Path(result["parse_json_path"]).exists()
     assert result["annotated_pdf_path"] is not None
     assert Path(result["annotated_pdf_path"]).exists()
 
@@ -108,7 +117,7 @@ def test_usage_survives_post_request_failure(tmp_path, monkeypatch):
 def test_graph_rejects_other_models_before_preprocessing(monkeypatch):
     monkeypatch.setattr(graph_module, "preprocess", lambda *a: pytest.fail("Unexpected preprocessing"))
     with pytest.raises(ValueError, match="Unsupported model"):
-        graph_module.run_graph("unused", model="gpt-6-luna")
+        graph_module.run_graph("unused", model="unsupported-model")
 
 
 def test_direct_compiled_graph_initializes_run_state(tmp_path, monkeypatch):

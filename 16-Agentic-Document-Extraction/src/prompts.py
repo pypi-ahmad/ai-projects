@@ -4,8 +4,9 @@ caller didn't supply raises `KeyError` rather than rendering with the
 placeholder left in (see tests/test_prompts.py) -- callers are expected to
 pass every value the template needs, not to handle a partially-filled prompt.
 
-Next: prompts/runtime/*.md for the template text itself, or src/extract.py
-for how a rendered prompt is embedded in a model call.
+All model-facing instruction text belongs in prompts/runtime/*.md. Callers
+may supply document data and page metadata, but must not assemble prompt
+instructions in Python.
 """
 
 from pathlib import Path

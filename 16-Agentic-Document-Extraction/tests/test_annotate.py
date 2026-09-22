@@ -11,7 +11,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from src.annotate import annotate_document
-from src.schema import BBox, ParseBlock, ParsePage, ParseResult
+from src.layout import BBox, ParseBlock, ParsePage, ParseResult
 
 FIXTURE_PATH = (Path(__file__).parent / "fixtures" / "invoice.png").resolve()
 
@@ -77,7 +77,7 @@ def test_missing_or_out_of_range_bbox_is_skipped_not_crashed(tmp_path, monkeypat
     assert '"blocks_skipped": 2' in meta
 
 
-def test_field_labels_used_for_matched_block(tmp_path, monkeypatch):
+def test_block_type_label_is_drawn(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
     parse_result = ParseResult(
@@ -95,9 +95,7 @@ def test_field_labels_used_for_matched_block(tmp_path, monkeypatch):
         ],
     )
 
-    pdf_path, meta_path = annotate_document(
-        FIXTURE_PATH, parse_result, field_labels={"grand_total": "b1"}
-    )
+    pdf_path, meta_path = annotate_document(FIXTURE_PATH, parse_result)
 
     assert pdf_path.exists()
     meta = meta_path.read_text(encoding="utf-8")

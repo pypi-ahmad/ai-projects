@@ -1,6 +1,4 @@
-"""Tests for the active src.parse.parse_document -- including the bounded
-concurrent page-parsing path, and that each page's success/failure outcome
-stays attached to its own page number rather than leaking across threads.
+"""Tests for sequential, context-aware document layout parsing.
 
 Next: src/parse.py.
 """
@@ -14,7 +12,7 @@ from pathlib import Path
 from openai import ContentFilterFinishReasonError
 
 from src import parse as parse_module
-from src.schema import BBox, ParseBlock, ParsePage
+from src.layout import BBox, ParseBlock, ParsePage
 
 FIXTURE_PATH = (Path(__file__).parent / "fixtures" / "invoice.png").resolve()
 
@@ -96,29 +94,26 @@ def test_parse_document_keeps_pages_not_rejected_by_content_filter(tmp_path, mon
 
 
 @pytest.mark.parametrize("selected_model", ["gpt-6-sol"])
-def test_parallel_outcomes_stay_with_their_pages(tmp_path, monkeypatch, selected_model):
-    from threading import Barrier
+def test_sequential_outcomes_keep_page_identity_and_context(tmp_path, monkeypatch, selected_model):
     from src.diagnostics import ExtractionCallError, PageDiagnostic
 
     monkeypatch.chdir(tmp_path)
-    # Barrier(3) forces all three fake page calls to actually overlap in
-    # separate threads, rather than happening to run one-at-a-time by
-    # scheduling luck -- that's what makes this a real test of the
-    # thread-pool's per-page isolation, not just its call count.
-    barrier = Barrier(3)
     payloads = [dict(base64="", mime="image/png", page=n, width=100, height=100, doc_sha256="mixed")
                 for n in (1, 2, 3)]
     monkeypatch.setattr(parse_module, "preprocess_pages", lambda *a, **k: payloads)
+    contexts = []
 
     def fake_parse_page(image, mime, page_number, width, height, *, diagnostics, model, **kwargs):
         assert model == selected_model
-        barrier.wait(timeout=5)
+        contexts.append(kwargs["document_context"])
         outcome = {1: "parsed", 2: "refused", 3: "content_filtered"}[page_number]
         diagnostic = PageDiagnostic(outcome=outcome, request_id=f"req-{page_number}")
         diagnostics.append(diagnostic)
         if outcome != "parsed":
             raise ExtractionCallError(diagnostic)
-        return ParsePage(page=page_number, width_px=width, height_px=height, blocks=[])
+        return ParsePage(page=page_number, width_px=width, height_px=height, blocks=[
+            ParseBlock(id=f"p{page_number}", type="heading", text="Previous heading",
+                       bbox=None, conf=None, table=None)])
 
     monkeypatch.setattr(parse_module, "parse_page", fake_parse_page)
     result = parse_module.parse_document("unused", model=selected_model)
@@ -127,6 +122,7 @@ def test_parallel_outcomes_stay_with_their_pages(tmp_path, monkeypatch, selected
     assert [(d.page, d.request_id, d.outcome) for d in result.page_diagnostics] == [
         (1, "req-1", "parsed"), (2, "req-2", "refused"), (3, "req-3", "content_filtered")]
     assert json.loads(Path("data/parse/mixed.json").read_text())["page_diagnostics"][1]["outcome"] == "refused"
+    assert contexts == ["", "Previous heading", "Previous heading"]
 
 
 def test_all_failed_diagnostics_are_saved(tmp_path, monkeypatch):
@@ -147,22 +143,17 @@ def test_all_failed_diagnostics_are_saved(tmp_path, monkeypatch):
     assert saved["page_diagnostics"][0]["http_status"] == 429
 
 
-def test_progress_reports_completion_before_source_order(tmp_path, monkeypatch):
-    from threading import Event
+def test_progress_reports_completion_in_source_order(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
-    second_reported = Event()
     monkeypatch.setattr(parse_module, "preprocess_pages", lambda *a, **k: [
         dict(base64="", mime="image/png", page=n, width=100, height=100, doc_sha256="progress") for n in (1, 2)])
 
     def parse(image, mime, page_number, width, height, **kwargs):
-        if page_number == 1:
-            assert second_reported.wait(5)
         return ParsePage(page=page_number, width_px=width, height_px=height, blocks=[])
 
     events = []
     def progress(event):
         events.append(event)
-        second_reported.set()
 
     monkeypatch.setattr(parse_module, "parse_page", parse)
     result = parse_module.parse_document("unused", on_progress=progress)

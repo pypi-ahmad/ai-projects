@@ -4,10 +4,6 @@ under data/parse/. Both renderers walk the same block/reading-order
 (`_page_reading_order`) so they can't drift apart from each other; neither
 one re-parses the other's output.
 
-Must not: read from or write anything under data/committed/, data/review/,
-or data/crops/ -- those belong to the dormant invoice path (see
-docs/ARCHITECTURE.md).
-
 Next: src/annotate.py, which renders the same ParseResult as boxes on the
 source pages instead of text.
 """
@@ -19,7 +15,7 @@ import html as _html
 import re
 from pathlib import Path
 
-from src.schema import ParseBlock, ParsePage, ParseResult
+from src.layout import ParseBlock, ParsePage, ParseResult
 
 
 def _page_reading_order(page: ParsePage) -> list[ParseBlock]:
@@ -72,7 +68,7 @@ def _render_block(block: ParseBlock) -> str:
         return _render_table(block.table) if block.table else f"```\n{text}\n```"
     if block.type == "figure":
         return f"[figure] {text}".rstrip()
-    # text, line_item, other -> plain paragraph
+    # text, list, marginalia, other -> preserve the model's visible text.
     return text
 
 
@@ -161,6 +157,15 @@ def save_markdown_for_doc(result: ParseResult, *, output_dir: str | Path = "data
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"{result.doc_sha}.md"
     out_path.write_text(parse_to_markdown(result), encoding="utf-8")
+    return out_path
+
+
+def save_html_for_doc(result: ParseResult, *, output_dir: str | Path = "data/parse") -> Path:
+    """Write the self-contained HTML rendering next to the Markdown output."""
+    out_dir = Path(output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"{result.doc_sha}.html"
+    out_path.write_text(parse_to_html(result), encoding="utf-8")
     return out_path
 
 

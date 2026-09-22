@@ -1,50 +1,36 @@
-"""Shared model-call plumbing: builds the ChatOpenAI client (`_build_llm`)
-and drives every structured-output call through `_invoke_structured`, the
-one place OpenAI's strict json_schema mode, diagnostics capture, and
-token-usage recording all happen. `_build_llm`/`_image_message`/
-`_invoke_structured` are used today by the active layout parser
-(src/parse.py); `extract_invoice`, `extract_regions`, and `crop_and_extract`
-below are the dormant invoice-extraction/crop path (see
-docs/ARCHITECTURE.md) and are only reachable from their own tests.
+"""GPT-6 Sol client and layout-response plumbing.
 
-Must not: let a model call raise anything other than `ExtractionCallError`
+The active parser uses the internal layout response format to validate model
+output, record safe diagnostics, and account for tokens. It does not extract
+business fields or accept a user-defined extraction schema.
+
+Must not let a model call raise anything other than `ExtractionCallError`
 (with a populated `PageDiagnostic`) out of `_invoke_structured` -- callers
-(src/parse.py, and the dormant invoice path) depend on that single failure
+(src/parse.py) depends on that single failure
 shape to turn a bad page into a soft error instead of crashing the run. Must
 also never let raw provider text, headers, or request/response bodies reach
 a `PageDiagnostic` (see src/diagnostics.py's allowlist).
 
-Next: src/parse.py for the active caller, or src/diagnostics.py for the
+Next: src/parse.py for the caller, or src/diagnostics.py for the
 allowlist that keeps diagnostics safe to log/display.
 """
 
 from __future__ import annotations
 
-import base64
-import io
 import os
-from pathlib import Path
 
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, convert_to_openai_messages
 from langchain_openai import ChatOpenAI
-from PIL import Image
-from pydantic import BaseModel, ConfigDict, create_model
 from openai import APIStatusError, APIConnectionError
 
 from src import usage as _usage
 from src.models import DEFAULT_MODEL, MODEL_RATES
-from src.regions import crop_image_bbox
-from src.prompts import render_prompt
 from src.diagnostics import ExtractionCallError, PageDiagnostic, filter_annotations, safe_identifier, token_count
-from src.schema import Invoice, LineItem, Region, ValidationReport
 
 load_dotenv()
 
 MODEL_NAME = DEFAULT_MODEL
-
-NUMERIC_HEADER_FIELDS = {"subtotal", "tax", "grand_total"}
-
 
 class ExtractConfigError(Exception):
     """Raised when the environment isn't configured to call the model. Never hangs."""
@@ -180,92 +166,3 @@ def _invoke_structured(llm: ChatOpenAI, schema, messages: list, *, call_name: st
                       usage_known=diagnostic.usage_known, entries=usage_entries)
         if diagnostics is not None:
             diagnostics.append(diagnostic)
-
-
-def extract_invoice(
-    image_b64: str,
-    mime: str,
-    feedback: str | None = None,
-    markdown_context: str | None = None,
-) -> Invoice:
-    llm = _build_llm()
-
-    text = render_prompt("extract-invoice")
-    if markdown_context:
-        text += "\n\n" + render_prompt("markdown-context", markdown_context=markdown_context)
-    if feedback:
-        text += "\n\n" + render_prompt("validation-feedback", feedback=feedback)
-
-    return _invoke_structured(
-        llm, Invoice, [_image_message(text, image_b64, mime)], call_name="extract_invoice"
-    )
-
-
-class _RegionsOutput(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    regions: list[Region]
-
-
-def extract_regions(image_b64: str, mime: str, report: ValidationReport) -> list[Region]:
-    try:
-        llm = _build_llm()
-        error_summary = "; ".join(f"{e.code}: {e.msg}" for e in report.errors) or "none (low-confidence fields only)"
-        text = render_prompt("extract-regions", error_summary=error_summary)
-        result = _invoke_structured(
-            llm, _RegionsOutput, [_image_message(text, image_b64, mime)], call_name="extract_regions"
-        )
-        return result.regions if result and result.regions else []
-    except Exception:
-        # Any failure here (config error, model call failure, empty result)
-        # just means cropping is skipped, not fatal: see docs/REGIONS.md --
-        # cropping is a best-effort accuracy aid, and a full-page retry with
-        # the validation error as feedback is just as likely to fix an
-        # ordinary misread.
-        return []
-
-
-def crop_and_extract(
-    full_image: Image.Image, region: Region, hint: str, doc_sha: str
-) -> LineItem | dict:
-    """Crop `region` out of `full_image`, save it, and re-read just that field.
-
-    Returns a `LineItem` when `region.field_or_line_index` names a line item
-    (e.g. "line_items[0]"), otherwise a single-key dict for a header field.
-    """
-    crop_img = crop_image_bbox(full_image, region.bbox_xyxy)
-
-    # Saved for a human/debugging trail only (data/crops/<doc_sha>/<region.id>.png);
-    # nothing in this codebase reads a crop back off disk -- the model call
-    # below re-encodes the same crop from memory (crop_b64).
-    crop_dir = Path("data/crops") / doc_sha
-    crop_dir.mkdir(parents=True, exist_ok=True)
-    crop_img.save(crop_dir / f"{region.id}.png")
-
-    buf = io.BytesIO()
-    crop_img.save(buf, format="PNG")
-    crop_b64 = base64.b64encode(buf.getvalue()).decode("ascii")
-
-    llm = _build_llm()
-
-    if region.field_or_line_index.startswith("line_items["):
-        text = render_prompt("crop-line-item", hint=hint)
-        return _invoke_structured(
-            llm, LineItem, [_image_message(text, crop_b64, "image/png")], call_name="crop_and_extract"
-        )
-
-    # A header field's name isn't known until `region.field_or_line_index`
-    # arrives at runtime, so the structured-output schema for it is built on
-    # the fly (one required field, strict-mode `extra="forbid"`) rather than
-    # declaring every possible header field up front in src/schema.py.
-    field_name = region.field_or_line_index
-    field_type = float if field_name in NUMERIC_HEADER_FIELDS else str
-    field_capture = create_model(
-        "FieldCapture",
-        __config__=ConfigDict(extra="forbid"),
-        **{field_name: (field_type, ...)},
-    )
-    text = render_prompt("crop-field", field_name=field_name, hint=hint)
-    result = _invoke_structured(
-        llm, field_capture, [_image_message(text, crop_b64, "image/png")], call_name="crop_and_extract"
-    )
-    return result.model_dump()

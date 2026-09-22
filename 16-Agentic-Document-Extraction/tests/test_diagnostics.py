@@ -1,11 +1,11 @@
-"""Tests for src.extract's `_invoke_structured` diagnostic mapping and the
+"""Tests for src.llm's `_invoke_structured` diagnostic mapping and the
 secret-redaction guarantees in src/diagnostics.py's allowlist. Exercises
 success, refusal, content-filter, HTTP-error, and transport-error paths
 through a mocked OpenAI HTTP transport (`httpx.MockTransport`), asserting
 that provider text/headers/secrets never leak into a `PageDiagnostic` or a
 raised `ExtractionCallError`.
 
-Next: src/extract.py's `_invoke_structured`.
+Next: src/llm.py's `_invoke_structured`.
 """
 
 import json
@@ -17,8 +17,8 @@ import pytest
 
 from src import usage
 from src.diagnostics import ExtractionCallError, PageDiagnostic
-from src.extract import _image_message, _invoke_structured
-from src.schema import ParsePage, ParseResult
+from src.llm import _image_message, _invoke_structured
+from src.layout import ParsePage, ParseResult
 
 
 def call_response(body, *, status=200, headers=None, transport_error=False):
@@ -214,7 +214,7 @@ def test_resolution_evaluator_sends_actual_output_cap_and_medium_reasoning(monke
 
 
 def test_raw_client_cannot_bypass_single_model_guard():
-    from src.extract import ExtractConfigError
+    from src.llm import ExtractConfigError
     llm, requests = call_response(completion())
     llm.model_name = "other-model"
     try:

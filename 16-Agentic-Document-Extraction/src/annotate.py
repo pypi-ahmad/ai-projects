@@ -3,9 +3,7 @@ saves the result as a multi-page annotated PDF (plus per-page PNGs and a
 sidecar .meta.json) under data/annotated/ -- a human-readable check of what
 the layout parser found, not a data source anything else reads back.
 
-Must not: read from or write to data/committed/ or data/review/ (those
-belong to the dormant invoice path, see docs/ARCHITECTURE.md), and must not
-guess a box for a block with a missing/out-of-range bbox -- skip and count
+Must not guess a box for a block with a missing/out-of-range bbox -- skip and count
 it instead (see `_bbox_is_valid`).
 
 Next: src/markdown.py, which renders the same ParseResult as text instead of
@@ -22,7 +20,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 from src.preprocess import preprocess_pages
-from src.schema import ParseResult
+from src.layout import ParseResult
 
 BOX_COLOR = (220, 30, 30)
 LABEL_FONT_SIZE = 16
@@ -42,7 +40,6 @@ def annotate_document(
     source_path: str | Path,
     parse_result: ParseResult,
     *,
-    field_labels: dict[str, str] | None = None,
     output_dir: str | Path = "data/annotated",
 ) -> tuple[Path, Path]:
     """Draw every block's bbox onto a rasterized copy of each page and save a
@@ -54,15 +51,9 @@ def annotate_document(
     original PDF's own vector content (via pypdf/reportlab) would be a more
     fragile path for the same result, so this project doesn't use either.
 
-    `field_labels` maps an Invoice field name (e.g. "grand_total") to the
-    `ParseBlock.id` it came from, so that block's box is labeled with the
-    field name instead of its generic block type. Blocks with a missing or
-    out-of-range bbox are skipped, not guessed at, and counted in the
+    Blocks with a missing or out-of-range bbox are skipped and counted in the
     sidecar file.
     """
-    field_labels = field_labels or {}
-    block_id_to_label = {block_id: field for field, block_id in field_labels.items()}
-
     # Annotate exactly the pages parse_result actually covers (whatever page
     # range was parsed) -- no separate range/cap needed here.
     parsed_page_numbers = sorted(
@@ -91,7 +82,7 @@ def annotate_document(
                 continue
             x0, y0, x1, y1 = block.bbox.xyxy
             box_px = (x0 * image.width, y0 * image.height, x1 * image.width, y1 * image.height)
-            label = block_id_to_label.get(block.id, block.type)
+            label = block.type
             draw.rectangle(box_px, outline=BOX_COLOR, width=3)
             draw.text((box_px[0], max(box_px[1] - LABEL_FONT_SIZE - 2, 0)), label, fill=BOX_COLOR, font=font)
             drawn += 1

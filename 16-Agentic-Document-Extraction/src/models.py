@@ -4,7 +4,7 @@ docs/MODEL.md for how these rates are used and their caveats (estimates, not
 gateway billing data).
 
 Must not: silently fall back to a default for an unrecognized model id --
-src/extract.py's `_build_llm` and src/parse.py's `parse_document` both raise
+src/llm.py's `_build_llm` and src/parse.py's `parse_document` both raise
 instead (there is no automatic model fallback, see README.md).
 
 Next: src/usage.py, which turns these rates into a session cost estimate.
