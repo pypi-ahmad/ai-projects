@@ -1,6 +1,4 @@
-"""Custom Streamlit component (components.v2) providing the two
-copy-to-clipboard buttons ("Copy rendered" / "Copy Markdown") shown next to
-the Markdown preview in src/ui/app.py.
+"""Clipboard controls for Markdown and JSON artifacts.
 
 Must not: assign `data.html` to the live page via `innerHTML` -- `data.html`
 is derived from the source document's own content by src/markdown.py's
@@ -21,6 +19,7 @@ copy_buttons = st.components.v2.component(
     html="""
     <button type="button" id="rendered">Copy rendered</button>
     <button type="button" id="raw">Copy Markdown</button>
+    <button type="button" id="text">Copy</button>
     <span role="status" aria-live="polite"></span>
     <div id="preview" aria-hidden="true"></div>
     """,
@@ -39,6 +38,22 @@ copy_buttons = st.components.v2.component(
     export default function ({data, parentElement}) {
         const status = parentElement.querySelector('[role="status"]');
         const preview = parentElement.querySelector('#preview');
+        const textButton = parentElement.querySelector('#text');
+        const markdownButtons = [parentElement.querySelector('#rendered'), parentElement.querySelector('#raw')];
+        if (data.text !== undefined) {
+            markdownButtons.forEach(button => button.hidden = true);
+            textButton.textContent = data.label || 'Copy';
+            textButton.onclick = async () => {
+                try {
+                    await navigator.clipboard.writeText(data.text);
+                    status.textContent = ' Copied.';
+                } catch {
+                    status.textContent = ' Copy unavailable. Allow clipboard access and open this app on localhost or HTTPS.';
+                }
+            };
+            return;
+        }
+        textButton.hidden = true;
         const parsed = new DOMParser().parseFromString(data.html, 'text/html');
         preview.replaceChildren(...parsed.body.childNodes);
         const renderedHtml = preview.innerHTML;

@@ -1,6 +1,7 @@
 """Single-model document UI. Only an explicit Parse click calls the model."""
 from __future__ import annotations
 
+import base64
 import hashlib
 from pathlib import Path
 
@@ -10,7 +11,7 @@ from src import usage
 from src.models import DEFAULT_MODEL
 from src.graph import run_graph
 from src.markdown import parse_to_html
-from src.preprocess import count_pages
+from src.preprocess import count_pages, preprocess_pages
 from src.ui.clipboard import copy_buttons
 
 INBOX_DIR = Path("data/inbox")
@@ -25,6 +26,14 @@ if st.session_state.get("usage_model_version") != DEFAULT_MODEL:
     st.session_state.pop("last_parse_result", None)
 
 _usage_display = st.empty()
+
+
+@st.cache_data(max_entries=8, show_spinner=False)
+def load_input_preview(path: str, start_page: int, end_page: int) -> list[tuple[int, bytes]]:
+    return [
+        (page["page"], base64.b64decode(page["base64"]))
+        for page in preprocess_pages(path, start_page=start_page, end_page=end_page)
+    ]
 
 
 def show_usage():
@@ -120,50 +129,74 @@ if result:
             st.json([d.model_dump(exclude_none=True) for d in current_parse.page_diagnostics])
             if any(d.outcome != "parsed" and not d.filters for d in current_parse.page_diagnostics):
                 st.caption("Filter details are unavailable for one or more failed pages. The provider did not supply recognized annotations.")
-    doc_sha = result.get("doc_sha", "document")
-    run_id = result.get("run_id", doc_sha)
-    tab_md, tab_html, tab_pdf, tab_json = st.tabs(
-        ["Markdown preview", "Formatted preview", "Annotated PDF", "Parse JSON"],
-        key="preview_tab", on_change="rerun",
-    )
-    if tab_md.open:
-        with tab_md:
-            md_text = result.get("markdown")
-            if md_text is not None and current_parse:
-                st.download_button("Download Markdown", data=md_text, file_name=f"{doc_sha}.md",
-                                   mime="text/markdown", key=f"{run_id}_download_md", on_click="ignore")
-                rendered_html = parse_to_html(current_parse)
-                copy_buttons(data={"markdown": md_text, "html": rendered_html},
-                             key=f"{run_id}_copy", height="content")
-                body = rendered_html.split("<body>", 1)[1].rsplit("</body>", 1)[0]
-                if body.strip():
-                    st.html(body)
-                else:
-                    st.info("No text blocks were extracted.")
+else:
+    current_parse = None
+
+doc_sha = result.get("doc_sha", "document") if result else "document"
+run_id = result.get("run_id", doc_sha) if result else upload_id
+tab_input, tab_md, tab_pdf, tab_html, tab_json = st.tabs(
+    ["Input preview", "Markdown", "Annotated", "HTML", "JSON"],
+    key="preview_tab", on_change="rerun",
+)
+
+if tab_input.open:
+    with tab_input:
+        try:
+            for page_number, image_bytes in load_input_preview(str(dest), int(start_page), end_page):
+                st.image(image_bytes, caption=f"Page {page_number}")
+        except Exception:
+            st.error("Unable to render the selected input pages.")
+
+if tab_md.open:
+    with tab_md:
+        md_text = result.get("markdown") if result else None
+        if md_text is not None and current_parse:
+            rendered_html = parse_to_html(current_parse)
+            st.download_button("Download Markdown", data=md_text, file_name=f"{doc_sha}.md",
+                               mime="text/markdown", key=f"{run_id}_download_md", on_click="ignore")
+            copy_buttons(data={"markdown": md_text, "html": rendered_html},
+                         key=f"{run_id}_copy_md", height="content")
+            markdown_view = st.segmented_control(
+                "Markdown view", ["Rendered", "Raw"], default="Rendered",
+                key=f"{run_id}_markdown_view",
+            )
+            if markdown_view == "Raw":
+                st.code(md_text, language="markdown", wrap_lines=True, height=500)
             else:
-                st.info("No layout parse markdown available for this document.")
-    if tab_html.open:
-        with tab_html:
-            if current_parse:
-                # Trusted template only: parse_to_html escapes every extracted value.
-                st.iframe(parse_to_html(current_parse), height=800)
-            else:
-                st.info("No parse result available to render.")
-    if tab_pdf.open:
-        with tab_pdf:
-            pdf_path = result.get("annotated_pdf_path")
-            if pdf_path and Path(pdf_path).is_file():
-                st.download_button("Download annotated PDF", data=Path(pdf_path).read_bytes(),
-                                   file_name=Path(pdf_path).name, mime="application/pdf", on_click="ignore")
-                for page_png in result.get("annotated_page_paths", []):
-                    st.image(page_png, caption=Path(page_png).stem)
-            else:
-                st.info("No annotated PDF available for this document.")
-    if tab_json.open:
-        with tab_json:
-            if current_parse:
-                st.download_button("Download parse JSON", data=current_parse.model_dump_json(indent=2),
-                                   file_name=f"{doc_sha}.json", mime="application/json", on_click="ignore")
-                st.json(current_parse.model_dump())
-            else:
-                st.info("No parse JSON available for this document.")
+                st.markdown(md_text)
+        else:
+            st.info("Parse the document to create Markdown.")
+
+if tab_pdf.open:
+    with tab_pdf:
+        pdf_path = result.get("annotated_pdf_path") if result else None
+        if pdf_path and Path(pdf_path).is_file():
+            st.download_button("Download annotated PDF", data=Path(pdf_path).read_bytes(),
+                               file_name=Path(pdf_path).name, mime="application/pdf",
+                               key=f"{run_id}_download_annotated", on_click="ignore")
+            for page_png in result.get("annotated_page_paths", []):
+                st.image(page_png, caption=Path(page_png).stem)
+        else:
+            st.info("Parse the document to create an annotated PDF.")
+
+if tab_html.open:
+    with tab_html:
+        if current_parse:
+            rendered_html = parse_to_html(current_parse)
+            st.download_button("Download HTML", data=rendered_html, file_name=f"{doc_sha}.html",
+                               mime="text/html", key=f"{run_id}_download_html", on_click="ignore")
+            st.iframe(rendered_html, height=800)
+        else:
+            st.info("Parse the document to create HTML.")
+
+if tab_json.open:
+    with tab_json:
+        if current_parse:
+            json_text = current_parse.model_dump_json(indent=2)
+            st.download_button("Download JSON", data=json_text, file_name=f"{doc_sha}.json",
+                               mime="application/json", key=f"{run_id}_download_json", on_click="ignore")
+            copy_buttons(data={"label": "Copy JSON", "text": json_text},
+                         key=f"{run_id}_copy_json", height="content")
+            st.json(current_parse.model_dump())
+        else:
+            st.info("Parse the document to create grounded layout JSON.")

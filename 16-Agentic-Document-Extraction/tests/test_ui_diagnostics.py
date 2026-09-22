@@ -10,7 +10,7 @@ from streamlit.testing.v1 import AppTest
 
 from src import graph
 from src.diagnostics import PageDiagnostic
-from src.schema import ParseResult, ParsePage
+from src.layout import ParseResult, ParsePage
 
 APP = Path(__file__).resolve().parents[1] / "src/ui/app.py"
 
@@ -69,7 +69,7 @@ def test_sol_only_and_tab_reruns_do_not_repeat_calls(uploaded, monkeypatch):
     app.button[0].click().run()
     assert len(app.get("progress")) == 1
     assert not app.get("iframe")
-    for tab in ("Formatted preview", "Parse JSON", "Annotated PDF", "Markdown preview"):
+    for tab in ("Markdown", "Annotated", "HTML", "JSON", "Input preview"):
         app.session_state["preview_tab"] = tab
         app.run()
         assert not app.exception
