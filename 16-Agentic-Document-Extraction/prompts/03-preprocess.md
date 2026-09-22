@@ -1,4 +1,4 @@
-# Phase 3; Preprocess and fixtures
+# Phase 3: Preprocess and fixtures
 
 **Implement** `preprocess(path) -> {doc_sha256, mime, base64, width, height, pages: 1}`. No OpenAI calls in this phase.
 

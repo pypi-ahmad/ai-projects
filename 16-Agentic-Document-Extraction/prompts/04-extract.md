@@ -1,4 +1,4 @@
-# Phase 4; Model extraction
+# Phase 4: Model extraction
 
 **Implement** `src/extract.py`. The graph isn't wired yet.
 

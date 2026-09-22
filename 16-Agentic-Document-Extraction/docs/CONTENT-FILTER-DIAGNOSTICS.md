@@ -1,9 +1,9 @@
-# Content-filter diagnostics — September 12, 2026
+# Content-filter diagnostics: September 12, 2026
 
-The diagnostic fix is implemented. Five of the six approved pages parsed;
-BadgeCare page 1 still returned `finish_reason=content_filter`. Capturing the
-raw response preserves metadata previously lost by automatic structured parsing.
-It does not remove the provider's rejection.
+The diagnostic fix is implemented. Five of six approved pages parsed; BadgeCare
+page 1 returned `finish_reason=content_filter`. Capturing the raw response keeps
+metadata that automatic structured parsing had discarded. The provider still
+rejected the page.
 
 ## Live evidence
 
@@ -28,14 +28,14 @@ The layout prompt also matches the original baseline byte for byte.
 BadgeCare evidence:
 
 - Request ID: `req_bd16f3fb6b954ec8a7cbbedc6bf4182f`.
-- Returned model: `gpt-5.6-terra`.
+- Returned model: the pre-migration default, not the current `gpt-6-sol`.
 - Reported tokens: 2,701 input, 2,216 output, 0 cached.
 - No recognized prompt/completion filter annotations were returned.
 - No rejected completion or refusal text was saved.
 
-HTTP 200 plus `content_filter` distinguishes this from a request-time HTTP 400
-rejection. The category and underlying reason remain unknown. The next step is
-provider review using the request ID and timestamp; no provider message was sent.
+HTTP 200 with `content_filter` differs from a request-time HTTP 400 rejection.
+The category and underlying reason are unknown. Provider review would need the
+request ID and timestamp; no provider message was sent.
 
 ## Validation and limits
 
@@ -45,10 +45,10 @@ HTTP errors, timeout sanitization, unknown usage, retry disabling, parallel page
 isolation, all-failed JSON persistence, and Streamlit diagnostics/stale-output checks.
 The UI was exercised through Streamlit AppTest, not a manual browser review.
 
-GroundTruth scoring remains in the manifest. It measures reference token overlap,
-not semantic correctness. Two successful pages contained ragged tables; existing
-display padding remains in place. This diagnostic change does not establish an
-extraction-accuracy improvement or resolve those table structures.
+GroundTruth scoring remains in the manifest. It measures reference-token overlap,
+not semantic correctness. Two successful pages contained ragged tables, and the
+display padding remains. This diagnostic work does not show an accuracy improvement
+or resolve the table structures.
 
 ## References
 

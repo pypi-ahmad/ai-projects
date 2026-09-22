@@ -1,7 +1,7 @@
 # Architecture
 
-A single LangGraph `StateGraph` per document. No multi-agent chat, no
-background workers.
+Each document uses one LangGraph `StateGraph`. Page requests use a bounded
+thread pool; the application has no multi-agent chat or separate service.
 
 ## Active graph
 
@@ -13,40 +13,42 @@ flowchart TD
 
 | Node | Responsibility |
 |---|---|
-| `preprocess` | Load the file, normalize to a capped-size image, compute `doc_sha256`. |
-| `parse` | Layout-parses pages `start_page..end_page` (1-based, `end_page=None` = through the last page; no fixed cap) into `ParseBlock`s, one concurrent call per page (bounded to `MAX_PARALLEL_PAGES`, since each page is an independent single-image call), via the shared `_build_llm`/`_invoke_structured` helpers in `src/extract.py`. Renders the result to Markdown and to a self-contained HTML page (`src/markdown.py`), and generates the annotated PDF plus one PNG per page (`src/annotate.py`). Best-effort throughout: a page or annotation failure is recorded in `parse_error`/`page_diagnostics` rather than raised. |
+| `preprocess` | Load the first page as a capped-size image, compute `doc_sha256`, and initialize missing run metadata/usage for direct compiled-graph callers. File/rendering errors can propagate. |
+| `parse` | Re-render the selected inclusive page range and parse layout via `src/extract.py`, with at most 50 concurrent single-image calls. Record per-page diagnostics; when any page succeeds, save Markdown and attempt annotation. Parse-step exceptions become `parse_error`/`status`; annotation exceptions are logged without discarding the parse. |
 
-`run_graph()` resets the token-usage accumulator (`src/usage.py`) before each
-run and attaches the accumulated `token_usage` list to the returned state.
+`run_graph()` creates a fresh usage ledger and artifact directory for every run.
+It streams page-completion events to an optional `on_progress` callback on the
+caller thread and returns the final state with `token_usage`. Results are sorted
+into source order after page calls finish. Each progress event has `completed`,
+`total`, `successful`, and `failed` counts. Artifact generation follows page
+parsing. The UI renders HTML from the current `ParseResult`; no LLM or graph node
+generates it. Only the selected preview tab is rendered.
+
 There is no `commit`/`review` split today: `parse` -> `END` regardless of
 outcome, and nothing is written to `data/committed/` or `data/review/`.
 
 ### Drawing on PDFs without a PDF library
 
-`src/annotate.py` doesn't use `pypdf` or `reportlab`. Every page is already
-rasterized to a PIL image for the rest of this pipeline (`preprocess_pages`,
-via `pypdfium2` for PDFs), and Pillow itself can write a multi-page PDF
-straight from a list of images (`Image.save(path, "PDF", save_all=True,
-append_images=[...])`). So boxes are drawn with `ImageDraw` on those same
-rasterized pages, then saved as a PDF with Pillow; no new dependency, and
-no risk of the fragility that comes with overlaying onto an original PDF's
-own vector content. The same rasterized pages are also saved individually as
-`data/annotated/<doc_sha>/page_NNN.png`, so the UI can show an inline
+`src/annotate.py` uses neither `pypdf` nor `reportlab`. `preprocess_pages`
+rasterizes each page to a PIL image through `pypdfium2`, and Pillow writes the
+multi-page PDF with `Image.save(path, "PDF", save_all=True, append_images=[...])`.
+`annotate_document` re-renders the covered pages, draws boxes with `ImageDraw`,
+and saves the PDF with Pillow. It also saves each annotated page as
+`data/parse/runs/<run_id>/annotated/<doc_sha>/page_NNN.png`, so the UI can show an inline
 preview without a PDF-viewer widget.
 
 ## Main types and state
 
 | Type | Lives in | Holds |
 |---|---|---|
-| `GraphState` (TypedDict) | `src/graph.py` | The graph's own state: `image_path`, `start_page`/`end_page`, `model`, `doc_sha`, `base64_image`/`mime`, `parse_result`, `markdown`, `parse_error`, `annotated_pdf_path`, `status`. |
+| `GraphState` (TypedDict) | `src/graph.py` | The graph's own state: `image_path`, `start_page`/`end_page`, `model`, `doc_sha`, `base64_image`/`mime`, `parse_result`, `markdown`, `parse_error`, `annotated_pdf_path`, `annotated_page_paths`, `markdown_path`, `parse_json_path`, `run_id`, `output_dir`, `token_usage`, `status`. |
 | `ParseResult` / `ParsePage` / `ParseBlock` / `BBox` | `src/schema.py` | The active schema: one `ParsePage` (with `blocks: list[ParseBlock]`) per page; `BBox.xyxy` and (dormant) `Region.bbox_xyxy` are normalized 0-1 coordinates, always exactly 4 values, enforced by a `field_validator`. |
 | `PageDiagnostic` | `src/diagnostics.py` | Per-page call outcome (`parsed`/`content_filtered`/`refused`/`incomplete`/`invalid_response`/`http_error`/`transport_error`), HTTP status, sanitized request/model ids, token counts, filter annotations; never raw response text, headers, or credentials. |
-| Token usage accumulator | `src/usage.py` | A plain module-level `list[dict]`, reset by `run_graph()` at the start of each run. Not per-run-isolated; see the `# ponytail:` comment in that file for the single-document-at-a-time assumption this relies on. |
+| Token usage ledger | `src/usage.py` | Explicit per-run `list[dict]`, passed through page calls and retained on failures. Session totals belong to Streamlit session state. |
 | `Invoice` / `LineItem` / `Region` / `ValidationReport` (dormant) | `src/schema.py` | The unwired invoice contract; see below. |
 
-There is no database and no session store beyond Streamlit's own
-`st.session_state` (the sidebar's page-range widgets, the last parse result,
-and the running session token-usage list, all keyed in `src/ui/app.py`).
+There is no database. Streamlit's `st.session_state` holds the sidebar page
+range, latest parse result, and session token-usage list in `src/ui/app.py`.
 
 ## External systems
 

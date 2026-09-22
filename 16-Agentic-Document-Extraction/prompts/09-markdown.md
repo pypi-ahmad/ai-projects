@@ -1,4 +1,4 @@
-# Phase 9; Layout-aware Markdown
+# Phase 9: Layout-aware Markdown
 
 **Implement** `src/markdown.py`: `parse_to_markdown(ParseResult) -> str`.
 
