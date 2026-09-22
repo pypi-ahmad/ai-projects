@@ -1,4 +1,4 @@
-# Phase 2; Schema and validation
+# Phase 2: Schema and validation
 
 **Implement** the Pydantic schemas and the arithmetic validator. No OpenAI calls, no graph wiring in this phase.
 

@@ -124,4 +124,4 @@ class ParseResult(BaseModel):
     pages: list[ParsePage]
     content_filtered_pages: list[int] = Field(default_factory=list)
     page_diagnostics: list[PageDiagnostic] = Field(default_factory=list)
-    model: str = "gpt-5.6-terra"
+    model: str = "gpt-6-sol"

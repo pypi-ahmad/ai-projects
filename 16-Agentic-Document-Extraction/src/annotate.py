@@ -43,6 +43,7 @@ def annotate_document(
     parse_result: ParseResult,
     *,
     field_labels: dict[str, str] | None = None,
+    output_dir: str | Path = "data/annotated",
 ) -> tuple[Path, Path]:
     """Draw every block's bbox onto a rasterized copy of each page and save a
     multi-page PDF, plus a sidecar .meta.json.
@@ -97,7 +98,7 @@ def annotate_document(
 
         annotated_images.append(image)
 
-    out_dir = Path("data/annotated")
+    out_dir = Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     pdf_path = out_dir / f"{doc_sha}.pdf"
     first, *rest = annotated_images

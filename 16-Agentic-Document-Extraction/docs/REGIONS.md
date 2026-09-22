@@ -1,11 +1,10 @@
 # Regions and cropping (dormant)
 
-**Status: not wired into the active graph.** `maybe_crop` isn't a node in
-`src/graph.py` anymore; see
+**Status: not wired into the active graph.** `maybe_crop` is no longer a node
+in `src/graph.py`; see
 [docs/ARCHITECTURE.md](ARCHITECTURE.md#dormant-the-invoice-extractionvalidation-graph).
-The schema and trigger rule below describe `src/regions.py` and the cropping
-functions in `src/extract.py` as they still exist on disk, for whoever
-re-wires them.
+The schema and trigger rule describe the remaining `src/regions.py` and
+`src/extract.py` cropping functions for a future rewiring.
 
 ## Region schema
 
@@ -38,8 +37,7 @@ accuracy aid, never a required step.
 
 ## Why
 
-Re-reading a tight crop of just the confusing cell (a smudged total, a
-rotated line) gives the model a cleaner second look than re-reading the
-whole page. It is not run when there's nothing pointing at a specific
-region, since a full-page retry with the validation error as feedback is
-just as likely to fix an ordinary misread.
+A tight crop of a confusing cell, such as a smudged total or rotated line,
+can give the model a clearer second look than the whole page. Without a
+specific region, the dormant flow uses a full-page retry with validation
+feedback instead.

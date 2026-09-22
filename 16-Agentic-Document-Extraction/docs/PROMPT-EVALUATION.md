@@ -1,10 +1,10 @@
 # Prompt evaluation; September 12, 2026
 
-**Decision: keep the baseline layout prompt.** Both revised layout prompts
-improved form segmentation and reference token overlap but introduced incorrect
+**Decision: keep the baseline layout prompt.** Both revised prompts improved
+form segmentation and reference-token overlap, but they introduced incorrect
 values. The corrective candidate transposed a facility tax identifier that the
-baseline had read correctly. This fails the agreed source-grounding acceptance
-gate. No third tuning round was run.
+baseline read correctly, so it failed the source-grounding acceptance gate. No
+third tuning round ran.
 
 Six other runtime prompts were revised. Reading-order preservation, safe table
 cell escaping, line breaks, and display-only ragged-row padding are active.
@@ -24,8 +24,9 @@ BadgeCare page 1 was content-filtered in baseline and candidate, then skipped
 entirely in the corrective round. No other pages were submitted. No content-filter
 retry, bypass, model change, or reference-text injection was used.
 
-All runs used the configured `gpt-5.6-terra` endpoint, temperature 0, the same
-reasoning setting recorded in each manifest, the same 1600-pixel rendering,
+These runs used the pre-migration default model and temperature 0. They do not
+validate the current `gpt-6-sol` configuration. The runs used the same reasoning
+setting recorded in each manifest, the same 1600-pixel rendering,
 one image per request, and concurrency capped at 50. Those historical runs
 set the LangChain wrapper's retry field after constructing its SDK client;
 inspection later showed the underlying client still allowed two transient
@@ -49,11 +50,12 @@ against coverage and has no transcription score.
 | Reported output tokens | 8,643 | 15,674 | 15,733 |
 | Mean successful-page latency | 18.03 s | 26.49 s | 27.28 s |
 
-Token overlap ignores punctuation, case, sequence, and field associations. It is
-not extraction accuracy. Spot checks were selected after inspection to diagnose
-errors; they measure visible value presence, not exhaustive association accuracy
-or performance on unseen documents. Filtered requests supplied no usage, so token
-totals are reported usage only. Timing is from single runs, not a latency benchmark.
+Token overlap ignores punctuation, case, sequence, and field associations. It
+does not measure extraction accuracy. Spot checks were selected after inspection
+to diagnose errors; they measure visible value presence rather than exhaustive
+association accuracy or performance on unseen documents. Filtered requests gave
+no usage, so token totals include reported usage only. Timing comes from single
+runs and is not a latency benchmark.
 
 The candidates turned these form sections into fields rather than tables. Zero
 ragged tables therefore does not prove better extraction of genuine repeated-row
@@ -78,10 +80,10 @@ Renderer behavior is covered separately by offline tests.
   The candidates also normalized a marked patient-type line instead of preserving
   its literal mark. Checkbox notation alone does not prove faithful transcription.
 
-LandingAI uses richer table-cell structures and sometimes describes logos or
-represents forms differently. Reference disagreement was inspected against source
-images rather than assuming every reference token was correct. No universal
-accuracy claim is supported.
+LandingAI uses richer table-cell structures and may describe logos or represent
+forms differently. Reference disagreement was checked against source images;
+reference tokens were not assumed correct. The results do not support a universal
+accuracy claim.
 
 ## Artifacts and checks
 

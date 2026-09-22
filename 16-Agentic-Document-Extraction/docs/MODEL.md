@@ -1,52 +1,48 @@
 # Model
 
-- Models: `gpt-5.6-terra` (default) and `gpt-5.6-luna`, selectable in the sidebar.
-  Both use the existing OpenAI-compatible endpoint; this is not
-  necessarily a model OpenAI itself hosts; `OPENAI_BASE_URL` is expected to
-  point at the gateway serving these models.
-- Modality: image in, structured JSON out. One `HumanMessage` per call with
-  a text instruction block and an `image_url` content block carrying a
-  `data:<mime>;base64,...` URL (the standard `langchain-openai` multimodal
-  shape).
-- `temperature=0`.
+- Model: `gpt-6-sol` only. Uses the existing OpenAI-compatible endpoint:
+  `OPENAI_BASE_URL` selects a gateway; omit it to use api.openai.com.
+- Each request contains an image and returns structured JSON. It uses one
+  `HumanMessage` with a text instruction block and an `image_url` block carrying
+  a `data:<mime>;base64,...` URL, the `langchain-openai` multimodal shape.
+- `temperature` is omitted by the shared client and raw request builder.
 - Structured output via the OpenAI SDK's raw-response `chat.completions.create`
   with a strict JSON schema, followed by local Pydantic validation.
   Filtering, refusal, and incomplete output are checked before validation.
 
-The active graph only ever sends the `ParsePage` schema (layout parsing).
+The active graph sends only the `ParsePage` schema for layout parsing.
 `Invoice`/`Region`/the regions wrapper are shaped by the same strict-mode
 constraints described below but aren't currently sent to the model ;
 extraction/validation is dormant, see
 [docs/ARCHITECTURE.md](ARCHITECTURE.md#dormant-the-invoice-extractionvalidation-graph).
 
-## Selection and pricing
+## Model and pricing
 
-The sidebar selection applies to the next Parse run. Every concurrent page in
-that run uses the same model. Changing the dropdown preserves the completed
-result and does not send API requests. The result identifies its own model.
-Python parsing/graph entrypoints accept an optional `model` argument and default
-to Terra. Unsupported IDs are rejected; there is no automatic model fallback.
+The UI has no model selector or automatic fallback. Python entrypoints retain
+the optional `model` argument for compatibility and reject values other than
+`gpt-6-sol` before API calls. Sol extracts page structure and text. Python renders
+Markdown, HTML, and annotations.
 
-Rates in `src/models.py` are user-supplied USD estimates per million tokens:
+Rates in `src/models.py` are USD estimates per million tokens from the linked
+OpenAI model pages:
 
-| Model | Input | Cached input | Output |
-| --- | ---: | ---: | ---: |
-| Terra | $2.00 | $0.20 | $12.00 |
-| Luna | $0.20 | $0.02 | $1.20 |
+| Model | Input | Cached input | Cache writes | Output |
+| --- | ---: | ---: | ---: | ---: |
+| GPT-6 Sol | $2.00 | $0.20 | $2.50 | $10.00 |
 
-Costs are summed per call using its requested model, including sessions that
-use both models. The provider-returned model is retained separately in page
-diagnostics. Switching models never reprices previous calls. Missing usage
-remains unknown, not a claim that a failed call was free.
+Costs are summed from the explicit per-run ledger. The provider-returned model
+is retained separately in diagnostics; an alias never changes pricing. Missing
+usage remains unknown; a failed call is not assumed free. On upgrading,
+the UI starts a fresh Sol session ledger rather than repricing legacy calls.
 
-[Luna documentation](https://developers.openai.com/api/docs/models/gpt-5.6-luna)
-lists image input, Chat Completions, and structured outputs. The configured
-gateway's compatibility must be verified separately.
+[GPT-6 Sol](https://developers.openai.com/api/docs/models/gpt-6-sol) supports
+image input, Chat Completions, structured outputs, and prompt caching. These
+base-rate estimates exclude long-context, regional, Batch/Flex, Fast-mode, and
+gateway-specific adjustments. They are not billing records.
 
-## Reasoning effort; a documented uncertainty
+## Reasoning effort and observed gateway support
 
-Luna always uses `reasoning_effort="high"`. Terra retains the
-`REASONING_EFFORT` environment setting described below.
+Sol uses the `REASONING_EFFORT` environment setting described below.
 
 The installed `langchain-openai==1.6.2` declares `reasoning_effort: str | None`
 as a genuine top-level field on `ChatOpenAI` (verified locally by
@@ -56,10 +52,14 @@ parameter, not routed through OpenAI's separate Responses API. That's a
 different, older mechanism (`ChatOpenAI(reasoning={"effort": ...},
 output_version="responses/v1")`) that this project does not use.
 
-Gateway support varies. `src/extract.py` reads `REASONING_EFFORT` from the
+OpenAI documents `reasoning_effort` for Chat Completions. Gateway support can
+still vary. `src/extract.py` reads `REASONING_EFFORT` from the
 environment (default `"medium"`). An empty value omits the field. The September
-12 live evaluation accepted the configured value; that verifies request
-acceptance, not how the gateway implements reasoning.
+23 Sol comparison sent `medium` with strict structured output: all ten requests
+returned HTTP 200 and the model identifier `gpt-6-sol`. This verifies acceptance
+for those calls only. It does not establish the gateway's internal reasoning
+behavior or support for other effort settings. See
+[the current evaluation](SOL-RESOLUTION-EVALUATION.md).
 
 ## Strict `json_schema` mode constrains how the Pydantic schemas are written
 
@@ -93,12 +93,15 @@ after this fix: every property required, no `prefixItems`/`minItems`/
 ## Token usage and cost
 
 Every structured-output call uses `_invoke_structured` in `src/extract.py`.
-It captures reported input/output/cached usage before checking the completion.
-`src/usage.py` records this in the existing process-wide accumulator, reset
-for each document run. Missing input/output usage is explicitly unknown;
-the UI labels incomplete totals as reported and excludes unknown usage from
-the cost estimate. Rates follow the selected model's table above; these are
-estimates, not gateway billing data.
+It captures reported input/output/cached/cache-write usage before checking the
+completion.
+The graph allocates a ledger and explicitly passes it through page calls.
+`src/usage.py` has no shared accumulator or reset operation. Failed calls retain
+reported usage even if artifact writing fails. Streamlit accumulates completed
+runs in session state. Missing input/output usage stays unknown and is excluded
+from the reported cost estimate. Input totals already include cached and
+cache-write tokens: ordinary input is `max(input - cached - cache_write, 0)`.
+Each category uses the corresponding Sol rate above.
 
 ## Page diagnostics
 

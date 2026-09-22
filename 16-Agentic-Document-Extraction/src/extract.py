@@ -66,10 +66,9 @@ def _build_llm(model: str = DEFAULT_MODEL) -> ChatOpenAI:
     base_url = os.environ.get("OPENAI_BASE_URL") or None
     return ChatOpenAI(
         model=model,
-        temperature=0,
         api_key=api_key,
         base_url=base_url,
-        **({"reasoning_effort": "high"} if model == "gpt-5.6-luna" else _reasoning_kwargs()),
+        **_reasoning_kwargs(),
     )
 
 
@@ -83,7 +82,11 @@ def _image_message(text: str, image_b64: str, mime: str) -> HumanMessage:
 
 
 def _invoke_structured(llm: ChatOpenAI, schema, messages: list, *, call_name: str,
-                       diagnostics: list[PageDiagnostic] | None = None):
+                       diagnostics: list[PageDiagnostic] | None = None,
+                       usage_entries: list[dict] | None = None,
+                       max_completion_tokens: int | None = None):
+    if llm.model_name != DEFAULT_MODEL:
+        raise ExtractConfigError("Unsupported model")
     diagnostic = PageDiagnostic(requested_model=safe_identifier(llm.model_name))
     metadata = None
     try:
@@ -92,8 +95,10 @@ def _invoke_structured(llm: ChatOpenAI, schema, messages: list, *, call_name: st
         # headers, and the provider-returned `model`/filter fields this function
         # needs for diagnostics, so the request is built and parsed by hand here.
         kwargs = {"reasoning_effort": llm.reasoning_effort} if llm.reasoning_effort else {}
+        if max_completion_tokens is not None:
+            kwargs["max_completion_tokens"] = max_completion_tokens
         raw = llm.root_client.chat.completions.with_raw_response.create(
-            model=llm.model_name, temperature=llm.temperature,
+            model=llm.model_name,
             messages=convert_to_openai_messages(messages),
             response_format={"type": "json_schema", "json_schema": {
                 "name": schema.__name__, "strict": True, "schema": schema.model_json_schema(),
@@ -107,11 +112,14 @@ def _invoke_structured(llm: ChatOpenAI, schema, messages: list, *, call_name: st
         usage_data = data.get("usage") or {}
         diagnostic.input_tokens = token_count(usage_data.get("prompt_tokens"))
         diagnostic.output_tokens = token_count(usage_data.get("completion_tokens"))
-        diagnostic.cached_tokens = token_count((usage_data.get("prompt_tokens_details") or {}).get("cached_tokens"))
+        prompt_details = usage_data.get("prompt_tokens_details") or {}
+        diagnostic.cached_tokens = token_count(prompt_details.get("cached_tokens"))
+        diagnostic.cache_write_tokens = token_count(prompt_details.get("cache_write_tokens"))
         diagnostic.usage_known = diagnostic.input_tokens is not None and diagnostic.output_tokens is not None
         if usage_data:
             metadata = {"input_tokens": diagnostic.input_tokens, "output_tokens": diagnostic.output_tokens,
-                        "input_token_details": {"cache_read": diagnostic.cached_tokens}}
+                        "input_token_details": {"cache_read": diagnostic.cached_tokens,
+                                                "cache_write": diagnostic.cache_write_tokens}}
         for item in data.get("prompt_filter_results") or []:
             if isinstance(item, dict):
                 diagnostic.filters.extend(filter_annotations(item.get("content_filter_results"), "prompt"))
@@ -168,7 +176,8 @@ def _invoke_structured(llm: ChatOpenAI, schema, messages: list, *, call_name: st
         # or absent) usage is still recorded -- usage_known distinguishes a
         # genuinely-zero count from a truly unreported one, rather than
         # letting a failed call look free.
-        _usage.record(call_name, diagnostic.requested_model or DEFAULT_MODEL, metadata, usage_known=diagnostic.usage_known)
+        _usage.record(call_name, DEFAULT_MODEL, metadata,
+                      usage_known=diagnostic.usage_known, entries=usage_entries)
         if diagnostics is not None:
             diagnostics.append(diagnostic)
 

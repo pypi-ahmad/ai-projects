@@ -1,4 +1,4 @@
-# Phase 5; LangGraph wiring
+# Phase 5: LangGraph wiring
 
 **Implement** the LangGraph state machine wiring `src/extract.py` and `src/validate.py` together.
 
@@ -20,7 +20,7 @@
 
 `max_retries` defaults to 3.
 
-**Audit:** append to `data/audit/YYYYMMDD.jsonl`: `ts`, `doc_sha`, `node`, `retry_count`, `error_codes`, `model="gpt-5.6-terra"`.
+**Audit:** append to `data/audit/YYYYMMDD.jsonl`: `ts`, `doc_sha`, `node`, `retry_count`, `error_codes`, `model="gpt-6-sol"`.
 
 **CLI:** `python -m src.graph --path tests/fixtures/invoice.png --max-retries 3`
 

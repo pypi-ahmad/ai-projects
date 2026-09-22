@@ -76,17 +76,21 @@ def score_page(page: ParsePage, reference: dict) -> dict:
     }
 
 
-def run_page(payload: dict, prompt: str) -> dict:
+def run_page(payload: dict, prompt: str, *, max_completion_tokens: int | None = None,
+             reasoning_effort: str | None = None) -> dict:
     started = time.perf_counter()
     outcome = {"page": payload["page"], "document_sha256": payload["doc_sha256"]}
     diagnostics = []
     try:
         llm = _build_llm()
+        if reasoning_effort is not None:
+            llm.reasoning_effort = reasoning_effort
         llm.root_client = llm.root_client.with_options(max_retries=0, timeout=180)
         text = prompt.format(page_number=payload["page"], width_px=payload["width"], height_px=payload["height"])
         page = _invoke_structured(
             llm, ParsePage, [_image_message(text, payload["base64"], payload["mime"])],
             call_name="parse_page", diagnostics=diagnostics,
+            max_completion_tokens=max_completion_tokens,
         )
         page = page.model_copy(update={"page": payload["page"], "width_px": payload["width"], "height_px": payload["height"]})
         outcome.update(status="parsed", result=page.model_dump())
@@ -101,7 +105,8 @@ def run_page(payload: dict, prompt: str) -> dict:
         diagnostic = diagnostics[-1].model_copy(update={"page": payload["page"]})
         outcome["diagnostics"] = diagnostic.model_dump()
         outcome["usage"] = ({"input_tokens": diagnostic.input_tokens, "output_tokens": diagnostic.output_tokens,
-                             "input_token_details": {"cache_read": diagnostic.cached_tokens}} if diagnostic.usage_known else None)
+                             "input_token_details": {"cache_read": diagnostic.cached_tokens,
+                                                     "cache_write": diagnostic.cache_write_tokens}} if diagnostic.usage_known else None)
     return outcome
 
 
@@ -121,7 +126,7 @@ def main() -> None:
     prompt_files = sorted(args.prompts.glob("*.md"))
     prompt = (args.prompts / "parse-page.md").read_text(encoding="utf-8").rstrip("\r\n")
     args.output.mkdir(parents=True, exist_ok=False)
-    manifest = {"model": MODEL_NAME, "temperature": 0, "reasoning": _build_llm().reasoning_effort,
+    manifest = {"model": MODEL_NAME, "temperature": None, "reasoning": _build_llm().reasoning_effort,
                 "max_parallel_pages": MAX_PARALLEL_PAGES, "max_retries": 0,
                 "prompts": {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in prompt_files},
                 "skipped_content_filtered": sorted(skipped), "pages": []}

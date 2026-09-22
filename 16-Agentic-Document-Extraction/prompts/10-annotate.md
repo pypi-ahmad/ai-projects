@@ -1,4 +1,4 @@
-# Phase 10; Annotated PDF and full graph wiring
+# Phase 10: Annotated PDF and full graph wiring
 
 **Implement** `src/annotate.py`, then wire `parse`/`markdown`/`annotate` into the graph and the UI.
 

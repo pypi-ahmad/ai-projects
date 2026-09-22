@@ -1,22 +1,20 @@
 # Compliance and audit
 
-**Current state: the active graph (`preprocess -> parse`) makes no
-arithmetic claim about a document and writes no audit trail.** It produces
-only a layout parse (Markdown/HTML/JSON) and an annotated PDF/PNGs; read-only
-reference artifacts for a human, not a proposed structured result that
-anything gates. The control-plane design described below; math validation
-and human review gating a commit, with an audit line per decision; is
-implemented in `src/validate.py`, `src/audit.py`, and the removed
-`commit`/`review` nodes, but none of it runs today. See
+**The active graph (`preprocess -> parse`) makes no arithmetic claim about a
+document and writes no audit trail.** It produces a layout parse
+(Markdown/HTML/JSON) and annotated PDF/PNGs for a human reader. The former
+control-plane design, where math validation and human review gated a commit and
+wrote an audit line, remains in `src/validate.py`, `src/audit.py`, and the
+removed `commit`/`review` nodes. The active graph does not use it. See
 [docs/ARCHITECTURE.md](ARCHITECTURE.md#dormant-the-invoice-extractionvalidation-graph)
 for why it's unwired. This project is not LandingAI's ADE product and not
 Reducto.
 
 ## No silent fixes (dormant design, preserved for re-wiring)
 
-The design: the model proposes an `Invoice`; `src/validate.py` is the only
-authority on whether it's correct, and nothing rewrites a number to make the
-math balance. A document would either:
+In the dormant design, the model proposes an `Invoice` and `src/validate.py`
+decides whether its arithmetic is correct. Nothing rewrites numbers to balance
+the math. A document would:
 
 - pass validation and be written to `data/committed/`, or
 - fail after all retries and be written to `data/review/` for a human, or
@@ -29,13 +27,19 @@ in the active graph or UI today.
 
 ## What's actually written today
 
-Layout parsing (`data/parse/<doc_sha>.json` + `.md`) and the annotated PDF
-plus per-page PNGs (`data/annotated/<doc_sha>.pdf`,
-`data/annotated/<doc_sha>/page_NNN.png`) are written on every run that
-reaches `parse`, whatever the outcome; parsing is best-effort, so a partial
-or failed parse just means fewer pages/blocks are in the output rather than
-nothing being written. There's no separate commit/review step: `parse` is
-the last node, and it doesn't gate its own output on anything.
+Graph runs use `data/parse/runs/<run_id>/`. Parse JSON contains successful
+pages and per-page diagnostics, including when every requested page fails.
+Preprocessing or filesystem failures can prevent that JSON write.
+
+Markdown is written only when at least one page parsed. Afterward, annotation
+can produce `annotated/<doc_sha>.pdf`, its metadata sidecar, and
+`annotated/<doc_sha>/page_NNN.png`. An all-failed parse produces neither Markdown
+nor annotation. Annotation failure does not discard the parse/Markdown, though
+incomplete annotation files may remain. The UI uses only the current result's
+returned artifact paths, not leftover files from previous runs.
+
+These are extraction-success conditions, not correctness approval. There is
+still no separate commit/review step or arithmetic gate.
 
 ## Audit trail: not currently written
 
@@ -55,17 +59,19 @@ schema below is what it would write if a node called it again:
 
 ## Data handling
 
-- Source images live only under `data/inbox/` and never leave the machine
-  except in the model call itself.
-- Layout parse output (`data/parse/`) and the annotated PDF/PNGs
-  (`data/annotated/`) are also derived directly from the source document's
-  content, so they follow the same rule.
+- The UI saves uploads under `data/inbox/` with a content hash and extension.
+  CLI/Python callers can supply source files elsewhere. Prepared page images
+  are sent to the configured model endpoint; the source file itself stays local.
+- Graph outputs under `data/parse/runs/`, standalone helper outputs under
+  `data/parse/` or `data/annotated/`, and evaluation artifacts contain source
+  document content and require the same handling as the originals.
 - `data/crops/`, `data/committed/`, and `data/review/` are not written by the
   active graph; cropping, commit, and review are all dormant (see above).
   Any files already present under those paths predate the pipeline being
   unwired.
-- `.gitignore` excludes `data/inbox/*`, `data/crops/*`, `data/parse/*`,
-  `data/annotated/*`, `.env`, and `.venv` so scanned documents, their
-  derivatives, and secrets are never committed to source control.
+- Project and parent ignore rules exclude known runtime artifact directories,
+  `.env`, and `.venv` from ordinary staging. Ignore rules do not protect files
+  that are already tracked or force-added. Check staged content before publication.
+  The app retains artifacts until someone removes them.
 - Nothing in this project uploads a document anywhere other than the
   configured `OPENAI_BASE_URL` endpoint for parsing/extraction calls.

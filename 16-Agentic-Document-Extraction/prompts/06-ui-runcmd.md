@@ -1,4 +1,4 @@
-# Phase 6; Streamlit UI and run.cmd
+# Phase 6: Streamlit UI and run.cmd
 
 **Implement** `src/ui/app.py` and the real `run.cmd`.
 

@@ -1,4 +1,4 @@
-# Phase 7; Doc sync and dependency pinning
+# Phase 7: Doc sync and dependency pinning
 
 **Implement** documentation and dependency cleanup only; add no new features unless closing this phase reveals a failing test.
 
@@ -9,4 +9,4 @@
 
 **Verification:** report the full file tree at the end of this phase.
 
-**Reinforcement** (sent immediately after this phase started): the model name is `gpt-5.6-terra`; do not substitute a different or "corrected" model name anywhere.
+**Reinforcement** (sent immediately after this phase started): the model name is `gpt-6-sol`; do not substitute a different or "corrected" model name anywhere.
