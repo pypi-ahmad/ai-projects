@@ -1,7 +1,10 @@
 # Sol resolution comparison: September 23, 2026
 
-**Decision: retain 200-DPI PDF rendering capped at a 1,600-pixel long edge.**
-The 300-DPI / 3,200-pixel candidate failed the agreed no-regression gate.
+This file records the September 23 resolution experiment. The current runtime
+prompt has changed since the run, but the rendering decision remains in the code.
+
+Decision: retain 200-DPI PDF rendering capped at a 1,600-pixel long edge.
+The 300-DPI, 3,200-pixel candidate failed the agreed no-regression gate.
 This five-page comparison does not establish that higher-resolution input is
 worse for every document.
 
@@ -32,9 +35,9 @@ worse for every document.
 | Masked Amerigroup_1 | 2 | 95.79% | 96.48% |
 | Unweighted mean | | **95.57%** | **95.02%** |
 
-Two pages regressed, two tied, and one improved. The candidate therefore fails
-both the per-page no-regression requirement and the aggregate-improvement
-requirement. It was not promoted. Visual source review was not performed after
+Two pages regressed, two tied, and one improved. The candidate failed
+the per-page no-regression requirement and the aggregate-improvement
+requirement, so it was not promoted. Visual source review was not performed after
 the metric gate failed. The results do not establish verified field-level OCR
 improvement. Token F1 does not establish correct identifiers, checkbox states,
 reading order, or table associations.
@@ -53,14 +56,12 @@ progress events with **zero additional API calls**. UI behavior was tested with
 Streamlit AppTest, not a manual browser session; clipboard JavaScript was not
 browser-tested.
 
-OpenAI recommends enlarging small text, motivating this controlled comparison.
+OpenAI recommends enlarging small text, which motivated this controlled comparison.
 Its current vision sizing table does not establish Sol-specific `original`
 behavior, so the comparison kept automatic detail. See the
 [vision guide](https://developers.openai.com/api/docs/guides/images-vision).
-see [evaluation guidance](https://developers.openai.com/api/docs/guides/evaluation-best-practices).
-Task-specific evaluation and source review are still needed alongside scores;
-see [evaluation guidance](https://developers.openai.com/api/docs/guides/evaluation-best-practices).
-see [evaluation guidance](https://developers.openai.com/api/docs/guides/evaluation-best-practices).
+Task-specific evaluation and source review are still needed alongside scores; see
+[evaluation guidance](https://developers.openai.com/api/docs/guides/evaluation-best-practices).
 
 The UI changes use [dynamic tabs](https://docs.streamlit.io/develop/api-reference/layout/st.tabs)
 to defer hidden previews and keep page-progress updates on the script thread,

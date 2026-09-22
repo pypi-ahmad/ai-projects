@@ -1,9 +1,12 @@
 # Content-filter diagnostics: September 12, 2026
 
-The diagnostic fix is implemented. Five of six approved pages parsed; BadgeCare
-page 1 returned `finish_reason=content_filter`. Capturing the raw response keeps
-metadata that automatic structured parsing had discarded. The provider still
-rejected the page.
+This file records the September 12 run. Its model, prompt, test count, and
+concurrency details are historical and do not describe the current runtime.
+
+The diagnostic fix was implemented. Five of the six approved pages parsed.
+BadgeCare page 1 returned `finish_reason=content_filter`. Capturing the raw
+response retained metadata that automatic structured parsing had discarded,
+although the provider still rejected the page.
 
 ## Live evidence
 
@@ -19,9 +22,9 @@ and rendered images, and an exact prompt snapshot. Earlier runs were preserved.
 | Masked Amerigroup_1 | 1 | parsed | 200 | stop |
 | Masked Amerigroup_1 | 2 | parsed | 200 | stop |
 
-Only these pages were submitted, once each by the evaluator, with one image per
-call and the actual SDK client's retries set to zero. Six distinct request IDs
-were captured. This does not establish whether the gateway retries internally.
+The evaluator submitted each listed page once, with one image per call and the
+SDK client's retries set to zero. It captured six distinct request IDs. The run
+did not reveal whether the gateway retries internally.
 Model, temperature, reasoning setting, image rendering, and prompts were unchanged.
 The layout prompt also matches the original baseline byte for byte.
 
@@ -34,8 +37,8 @@ BadgeCare evidence:
 - No rejected completion or refusal text was saved.
 
 HTTP 200 with `content_filter` differs from a request-time HTTP 400 rejection.
-The category and underlying reason are unknown. Provider review would need the
-request ID and timestamp; no provider message was sent.
+The category and underlying reason are unknown. A provider review would need the
+request ID and timestamp. No provider message was sent.
 
 ## Validation and limits
 
@@ -47,8 +50,8 @@ The UI was exercised through Streamlit AppTest, not a manual browser review.
 
 GroundTruth scoring remains in the manifest. It measures reference-token overlap,
 not semantic correctness. Two successful pages contained ragged tables, and the
-display padding remains. This diagnostic work does not show an accuracy improvement
-or resolve the table structures.
+display padding remains. The run neither shows an accuracy improvement nor resolves
+the table structures.
 
 ## References
 

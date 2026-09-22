@@ -1,14 +1,19 @@
-# Prompt evaluation; September 12, 2026
+# Prompt evaluation: September 12, 2026
 
-**Decision: keep the baseline layout prompt.** Both revised prompts improved
+This is a historical evaluation record. The current runtime has one rewritten
+`gpt-6-sol` prompt in `prompts/runtime/parse-page.md`; the prompt files discussed
+below are no longer part of the application.
+
+Decision: keep the baseline layout prompt used in this run. Both revised prompts improved
 form segmentation and reference-token overlap, but they introduced incorrect
 values. The corrective candidate transposed a facility tax identifier that the
 baseline read correctly, so it failed the source-grounding acceptance gate. No
 third tuning round ran.
 
-Six other runtime prompts were revised. Reading-order preservation, safe table
-cell escaping, line breaks, and display-only ragged-row padding are active.
-The layout candidates and every captured result remain available for review.
+Six other runtime prompts were revised at the time. That version preserved reading
+order, escaped table cells safely, retained line breaks, and padded ragged rows for
+display. The ignored local artifact directory contains the captured candidates and
+results when those files are available in the checkout.
 
 ## Live scope and controls
 
@@ -57,8 +62,8 @@ association accuracy or performance on unseen documents. Filtered requests gave
 no usage, so token totals include reported usage only. Timing comes from single
 runs and is not a latency benchmark.
 
-The candidates turned these form sections into fields rather than tables. Zero
-ragged tables therefore does not prove better extraction of genuine repeated-row
+The candidates turned these form sections into fields instead of tables. The zero
+ragged-table count therefore does not prove better extraction of genuine repeated-row
 tables. Live true-grid and merged-cell accuracy remain unmeasured on this corpus.
 Renderer behavior is covered separately by offline tests.
 
@@ -96,12 +101,12 @@ Local artifacts live under `data/parse/prompt-eval-20260912/`:
   and exact prompt snapshots with hashes.
 - `baseline-prompts/`: original seven templates for comparison and rollback.
 
-The six non-layout prompt revisions passed offline rendering/composition tests;
-they were not live-tested on invoices because only the specified medical-document
-pages were authorized. Required numeric fields in legacy schemas still cannot
-represent missing values; prompts alone do not solve that limitation.
+The six non-layout prompt revisions passed offline rendering and composition tests.
+They were not live-tested on invoices because authorization covered only the listed
+medical-document pages. Required numeric fields in the legacy schemas could not
+represent missing values, and prompt wording did not change that limitation.
 
-The full offline suite passes 63 tests, including column ordering, table escaping,
+At the time of this evaluation, the full offline suite passed 63 tests, including column ordering, table escaping,
 empty/ragged/multiline cells, Unicode/braces in templates, the exact live allowlist,
 skipping filtered pages, and existing partial-failure behavior. Runtime layout
 prompt bytes were checked against the baseline snapshot after rollback.
