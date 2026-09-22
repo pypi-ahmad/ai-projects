@@ -1,7 +1,7 @@
 """Active layout-parsing entry point. `parse_document` fans a page range out
 across a bounded thread pool and calls `parse_page` (a thin wrapper over
 src/extract.py's `_invoke_structured`/`ParsePage`) once per page, then writes
-`data/parse/<doc_sha>.json` itself -- this is the only unconditionally-called
+`<output_dir>/<doc_sha>.json` itself -- this is the only unconditionally-called
 consumer of src/extract.py's model-call plumbing in the active graph (see
 src/graph.py).
 
@@ -16,7 +16,8 @@ Next: src/markdown.py, which renders whatever `ParseResult` this produces.
 from __future__ import annotations
 
 import argparse
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from collections.abc import Callable
 from pathlib import Path
 
 from openai import ContentFilterFinishReasonError
@@ -40,13 +41,15 @@ MAX_PARALLEL_PAGES = 50
 def parse_page(
     image_b64: str, mime: str, page_number: int, width_px: int, height_px: int,
     *, diagnostics: list[PageDiagnostic] | None = None, model: str = DEFAULT_MODEL,
+    usage_entries: list[dict] | None = None,
 ) -> ParsePage:
     llm = _build_llm(model=model)
     text = render_prompt(
         "parse-page", page_number=page_number, width_px=width_px, height_px=height_px
     )
     result = _invoke_structured(
-        llm, ParsePage, [_image_message(text, image_b64, mime)], call_name="parse_page", diagnostics=diagnostics
+        llm, ParsePage, [_image_message(text, image_b64, mime)], call_name="parse_page",
+        diagnostics=diagnostics, usage_entries=usage_entries,
     )
     # We already know the true page/geometry from preprocessing; only the
     # model's `blocks` are worth trusting.
@@ -56,6 +59,9 @@ def parse_page(
 def parse_document(
     path: str | Path, *, start_page: int = 1, end_page: int | None = None,
     model: str = DEFAULT_MODEL,
+    usage_entries: list[dict] | None = None,
+    on_progress: Callable[[dict], None] | None = None,
+    output_dir: str | Path = "data/parse",
 ) -> ParseResult:
     """Layout-parse every page in [start_page, end_page] (1-based, inclusive;
     end_page=None means through the last page -- there is no page cap).
@@ -68,6 +74,8 @@ def parse_document(
     if model not in MODEL_RATES:
         raise ValueError("Unsupported model")
     pages_payload = preprocess_pages(path, start_page=start_page, end_page=end_page)
+    if not pages_payload:
+        raise ValueError("Page range contains no pages")
     doc_sha = pages_payload[0]["doc_sha256"]
 
     def parse_payload(payload: dict) -> tuple[ParsePage | None, PageDiagnostic]:
@@ -81,6 +89,7 @@ def parse_document(
                 payload["height"],
                 diagnostics=diagnostics,
                 model=model,
+                usage_entries=usage_entries,
             )
             diagnostic = diagnostics[-1] if diagnostics else PageDiagnostic(outcome="parsed")
             return page, diagnostic.model_copy(update={"page": payload["page"]})
@@ -92,7 +101,17 @@ def parse_document(
             return None, PageDiagnostic(page=payload["page"], outcome="invalid_response", requested_model=model)
 
     with ThreadPoolExecutor(max_workers=MAX_PARALLEL_PAGES) as pool:
-        outcomes = list(pool.map(parse_payload, pages_payload))
+        futures = [pool.submit(parse_payload, payload) for payload in pages_payload]
+        outcomes = []
+        successful = 0
+        for future in as_completed(futures):
+            outcome = future.result()
+            outcomes.append(outcome)
+            successful += outcome[0] is not None
+            if on_progress:
+                on_progress({"completed": len(outcomes), "total": len(futures),
+                             "successful": successful, "failed": len(outcomes) - successful})
+    outcomes.sort(key=lambda outcome: outcome[1].page)
 
     pages = [page for page, _ in outcomes if page is not None]
     content_filtered_pages = [
@@ -105,7 +124,7 @@ def parse_document(
         page_diagnostics=[diagnostic for _, diagnostic in outcomes],
     )
 
-    out_dir = Path("data/parse")
+    out_dir = Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / f"{doc_sha}.json").write_text(result.model_dump_json(indent=2), encoding="utf-8")
 

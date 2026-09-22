@@ -95,7 +95,7 @@ def test_parse_document_keeps_pages_not_rejected_by_content_filter(tmp_path, mon
     assert saved["content_filtered_pages"] == [2]
 
 
-@pytest.mark.parametrize("selected_model", ["gpt-5.6-terra", "gpt-5.6-luna"])
+@pytest.mark.parametrize("selected_model", ["gpt-6-sol"])
 def test_parallel_outcomes_stay_with_their_pages(tmp_path, monkeypatch, selected_model):
     from threading import Barrier
     from src.diagnostics import ExtractionCallError, PageDiagnostic
@@ -110,7 +110,7 @@ def test_parallel_outcomes_stay_with_their_pages(tmp_path, monkeypatch, selected
                 for n in (1, 2, 3)]
     monkeypatch.setattr(parse_module, "preprocess_pages", lambda *a, **k: payloads)
 
-    def fake_parse_page(image, mime, page_number, width, height, *, diagnostics, model):
+    def fake_parse_page(image, mime, page_number, width, height, *, diagnostics, model, **kwargs):
         assert model == selected_model
         barrier.wait(timeout=5)
         outcome = {1: "parsed", 2: "refused", 3: "content_filtered"}[page_number]
@@ -145,3 +145,27 @@ def test_all_failed_diagnostics_are_saved(tmp_path, monkeypatch):
     saved = json.loads(Path("data/parse/failed.json").read_text())
     assert saved["page_diagnostics"][0]["page"] == 2
     assert saved["page_diagnostics"][0]["http_status"] == 429
+
+
+def test_progress_reports_completion_before_source_order(tmp_path, monkeypatch):
+    from threading import Event
+    monkeypatch.chdir(tmp_path)
+    second_reported = Event()
+    monkeypatch.setattr(parse_module, "preprocess_pages", lambda *a, **k: [
+        dict(base64="", mime="image/png", page=n, width=100, height=100, doc_sha256="progress") for n in (1, 2)])
+
+    def parse(image, mime, page_number, width, height, **kwargs):
+        if page_number == 1:
+            assert second_reported.wait(5)
+        return ParsePage(page=page_number, width_px=width, height_px=height, blocks=[])
+
+    events = []
+    def progress(event):
+        events.append(event)
+        second_reported.set()
+
+    monkeypatch.setattr(parse_module, "parse_page", parse)
+    result = parse_module.parse_document("unused", on_progress=progress)
+    assert [p.page for p in result.pages] == [1, 2]
+    assert [e["completed"] for e in events] == [1, 2]
+    assert events[-1] == dict(completed=2, total=2, successful=2, failed=0)

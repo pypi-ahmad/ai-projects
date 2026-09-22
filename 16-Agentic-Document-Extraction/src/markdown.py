@@ -153,11 +153,11 @@ def render_and_save(parse_json_path: str | Path) -> Path:
     return out_path
 
 
-def save_markdown_for_doc(result: ParseResult) -> Path:
-    """Write data/parse/<doc_sha>.md directly from an in-memory ParseResult
+def save_markdown_for_doc(result: ParseResult, *, output_dir: str | Path = "data/parse") -> Path:
+    """Write <output_dir>/<doc_sha>.md directly from an in-memory ParseResult
     (the graph's parse node already has the result, no JSON round-trip needed).
     """
-    out_dir = Path("data/parse")
+    out_dir = Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"{result.doc_sha}.md"
     out_path.write_text(parse_to_markdown(result), encoding="utf-8")

@@ -4,10 +4,8 @@ base64-encoded, plus its `doc_sha256`. `preprocess` handles page 1 only (used
 by the dormant invoice path); `preprocess_pages` is what the active graph
 calls for a page range.
 
-Must not: emit any mime type other than "image/png" (downstream code assumes
-exactly one mime type), or silently truncate a requested page range --
-`_render_pdf_page_range` clamps to the document's real page count rather
-than erroring, but never fabricates pages that don't exist.
+Must not emit anything other than "image/png" or silently truncate a range.
+Invalid page ranges are rejected before model calls.
 
 Next: src/parse.py, the active caller of `preprocess_pages`.
 """
@@ -26,6 +24,7 @@ from PIL import Image, ImageOps
 # -- changing this would make those recorded evaluation results non-reproducible
 # without a new evaluation run.
 MAX_LONG_EDGE = 1600
+PDF_DPI = 200
 
 _RASTER_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff"}
 
@@ -47,6 +46,8 @@ def count_pages(path: str | Path) -> int:
 
     suffix = p.suffix.lower()
     if suffix in _RASTER_EXTS:
+        with Image.open(p) as image:
+            image.verify()
         return 1
     if suffix != ".pdf":
         raise PreprocessError(f"unsupported file type: {suffix}")
@@ -109,13 +110,15 @@ def preprocess_pages(
     start_page: int = 1,
     end_page: int | None = None,
     enhance_contrast: bool = False,
+    max_long_edge: int = MAX_LONG_EDGE,
+    pdf_dpi: int = PDF_DPI,
 ) -> list[dict]:
     """Like `preprocess`, but one payload per page (a raster image is just page 1).
 
     `start_page`/`end_page` are 1-based and inclusive; `end_page=None` means
     "through the last page" -- there is no artificial page cap, so a large
-    range is the caller's own choice. A raster image always has exactly one
-    page, so the range is ignored for those. Each returned dict adds a
+    range is the caller's own choice. A raster image has exactly one page;
+    any other range is rejected. Each returned dict adds a
     "page" key -- the page's true 1-based number in the source document --
     alongside the same doc_sha256/mime/base64/width/height shape
     `preprocess` returns.
@@ -127,10 +130,16 @@ def preprocess_pages(
     suffix = p.suffix.lower()
     raw_bytes = p.read_bytes()
     doc_sha256 = hashlib.sha256(raw_bytes).hexdigest()
+    if max_long_edge < 1 or pdf_dpi < 1:
+        raise PreprocessError("Rendering dimensions must be positive")
+    if start_page < 1 or (end_page is not None and end_page < start_page):
+        raise PreprocessError("Invalid page range")
 
     if suffix == ".pdf":
-        page_numbers, images = _render_pdf_page_range(p, start_page=start_page, end_page=end_page)
+        page_numbers, images = _render_pdf_page_range(p, start_page=start_page, end_page=end_page, dpi=pdf_dpi)
     elif suffix in _RASTER_EXTS:
+        if start_page != 1 or end_page not in (None, 1):
+            raise PreprocessError("Raster images have only one page")
         image = Image.open(io.BytesIO(raw_bytes))
         image.load()
         page_numbers, images = [1], [image]
@@ -140,7 +149,7 @@ def preprocess_pages(
     pages = []
     for page_number, image in zip(page_numbers, images):
         image = image.convert("RGB")
-        image = _cap_long_edge(image, MAX_LONG_EDGE)
+        image = _cap_long_edge(image, max_long_edge)
         if enhance_contrast:
             image = ImageOps.autocontrast(image)
         buf = io.BytesIO()
@@ -168,7 +177,7 @@ def _cap_long_edge(image: Image.Image, max_long_edge: int) -> Image.Image:
 
 
 def _render_pdf_page_range(
-    p: Path, *, start_page: int, end_page: int | None
+    p: Path, *, start_page: int, end_page: int | None, dpi: int = PDF_DPI
 ) -> tuple[list[int], list[Image.Image]]:
     """Render pages `start_page..end_page` (1-based, inclusive) of a PDF.
 
@@ -181,14 +190,23 @@ def _render_pdf_page_range(
     pdf = pdfium.PdfDocument(str(p))
     try:
         total = len(pdf)
-        start = max(1, start_page)
-        end = min(end_page, total) if end_page is not None else total
-        if end < start:
-            return [], []
+        start = start_page
+        end = end_page if end_page is not None else total
+        if not 1 <= start <= end <= total:
+            raise PreprocessError(f"Page range must be within 1..{total}")
         page_numbers = list(range(start, end + 1))
-        # pypdfium2 renders in units of PDF points (1/72 inch); scale=200/72
-        # renders at roughly 200 dpi before MAX_LONG_EDGE caps it further.
-        images = [pdf[n - 1].render(scale=200 / 72).to_pil() for n in page_numbers]
+        # PDF points are 1/72 inch; the selected DPI is capped downstream.
+        images = []
+        for n in page_numbers:
+            page = pdf[n - 1]
+            try:
+                bitmap = page.render(scale=dpi / 72)
+                try:
+                    images.append(bitmap.to_pil().copy())
+                finally:
+                    bitmap.close()
+            finally:
+                page.close()
         return page_numbers, images
     finally:
         pdf.close()

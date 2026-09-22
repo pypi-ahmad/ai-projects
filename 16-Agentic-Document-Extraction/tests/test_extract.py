@@ -18,7 +18,7 @@ from src.schema import Invoice, LineItem, Region, ValidationErrorItem, Validatio
 from tests.fake_llm import FakeLLM as _FakeLLM
 
 
-@pytest.mark.parametrize("model", ["gpt-5.6-terra", "gpt-5.6-luna"])
+@pytest.mark.parametrize("model", ["gpt-6-sol"])
 def test_client_uses_selected_model_and_existing_settings(monkeypatch, model):
     monkeypatch.setenv("OPENAI_API_KEY", "test-not-a-real-key")
     monkeypatch.setenv("REASONING_EFFORT", "medium")
@@ -31,8 +31,8 @@ def test_client_uses_selected_model_and_existing_settings(monkeypatch, model):
     monkeypatch.setattr(extract, "ChatOpenAI", capture)
     extract._build_llm(model=model)
     assert captured["model"] == model
-    assert captured["temperature"] == 0
-    assert captured["reasoning_effort"] == ("high" if model == "gpt-5.6-luna" else "medium")
+    assert "temperature" not in captured
+    assert captured["reasoning_effort"] == "medium"
 
 
 def test_client_rejects_unsupported_model_before_api_call():

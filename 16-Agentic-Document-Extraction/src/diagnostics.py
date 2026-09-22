@@ -38,6 +38,7 @@ class PageDiagnostic(BaseModel):
     input_tokens: int | None = None
     output_tokens: int | None = None
     cached_tokens: int | None = None
+    cache_write_tokens: int | None = None
     filters: list[FilterAnnotation] = Field(default_factory=list)
 
 

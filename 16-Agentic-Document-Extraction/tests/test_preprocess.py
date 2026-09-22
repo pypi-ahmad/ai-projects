@@ -92,3 +92,26 @@ def test_preprocess_pages_single_image_is_one_page():
     result = preprocess_pages(FIXTURES_DIR / "invoice.png")
     assert len(result) == 1
     assert result[0]["page"] == 1
+
+
+@pytest.mark.parametrize("start,end", [(0, 1), (2, 1), (1, 5), (5, None)])
+def test_invalid_pdf_ranges_fail(tmp_path, start, end):
+    source = tmp_path / "multi.pdf"
+    _make_multi_page_pdf(source)
+    with pytest.raises(PreprocessError):
+        preprocess_pages(source, start_page=start, end_page=end)
+
+
+def test_resolution_profiles_and_no_raster_upscaling(tmp_path):
+    source = tmp_path / "tall.pdf"
+    Image.new("RGB", (1000, 2000), "white").save(source, "PDF")
+    baseline = preprocess_pages(source)[0]
+    candidate = preprocess_pages(source, pdf_dpi=300, max_long_edge=3200)[0]
+    assert (baseline["width"], baseline["height"]) == (800, 1600)
+    assert (candidate["width"], candidate["height"]) == (1600, 3200)
+    raster = tmp_path / "small.png"
+    Image.new("RGB", (100, 200)).save(raster)
+    page = preprocess_pages(raster, pdf_dpi=300, max_long_edge=3200)[0]
+    assert (page["width"], page["height"]) == (100, 200)
+    with pytest.raises(PreprocessError):
+        preprocess_pages(raster, start_page=2)

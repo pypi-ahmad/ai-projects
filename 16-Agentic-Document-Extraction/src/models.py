@@ -10,10 +10,9 @@ instead (there is no automatic model fallback, see README.md).
 Next: src/usage.py, which turns these rates into a session cost estimate.
 """
 
-DEFAULT_MODEL = "gpt-5.6-terra"
+DEFAULT_MODEL = "gpt-6-sol"
 
-# USD per million tokens: input, cached input, output.
+# USD per million tokens: input, cached input, cache write, output.
 MODEL_RATES = {
-    DEFAULT_MODEL: (2.00, 0.20, 12.00),
-    "gpt-5.6-luna": (0.20, 0.02, 1.20),
+    DEFAULT_MODEL: (2.00, 0.20, 2.50, 10.00),
 }
